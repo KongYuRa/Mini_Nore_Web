@@ -13,7 +13,7 @@ const packs = [
     icon: Mountain,
     color: 'bg-green-400',
     title: 'Adventure Pack',
-    description: 'Bright & exciting! Start your journey across the plains! 🌾',
+    description: 'Bright & exciting! 🌾',
   },
   {
     id: 'combat' as PackType,
@@ -72,10 +72,10 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
           transition={{ duration: 0.3 }}
           className="w-full"
         >
-          <div className="bg-white rounded-xl shadow-xl border-2 border-yellow-200 p-4">
+          <div className="bg-white rounded-xl shadow-xl border-2 border-yellow-200 p-4 min-h-[140px]">
             <div className="relative">
               <h3 className="text-gray-800 font-semibold mb-2">{selectedPackData.title}</h3>
-              <p className="text-gray-600 text-sm mb-3">{selectedPackData.description}</p>
+              <p className="text-gray-600 text-sm mb-3 h-5">{selectedPackData.description}</p>
               <button
                 className="w-full py-2 px-3 bg-gradient-to-r from-amber-300 to-yellow-300 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
                 onClick={(e) => {
