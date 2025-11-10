@@ -79,8 +79,13 @@ npm run dev
 3. **Vercel에서 배포**
    - Vercel 대시보드에서 "New Project"
    - GitHub repository 선택
+   - Framework Preset: "Vite" 선택
+   - Build Command: `npm run build` (자동 설정됨)
+   - Output Directory: `dist` (자동 설정됨)
    - "Deploy" 클릭
    - 완료! 🎉
+
+**참고**: `vercel.json` 파일이 이미 프로젝트에 포함되어 있어서 자동으로 설정됩니다!
 
 **결과**: `https://mini-nore.vercel.app` 같은 무료 도메인을 받게 됩니다!
 
