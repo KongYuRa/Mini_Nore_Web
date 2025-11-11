@@ -35,7 +35,17 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
 
   return (
     <div className="space-y-4 mb-4 w-80">
-      <div className="text-2xl text-center mb-3">🎵</div>
+      {/* Logo/Title */}
+      <div className="text-center mb-4">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
+          mini nore
+        </h1>
+        <div className="flex items-center justify-center gap-1 mt-1">
+          <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-yellow-300 to-transparent rounded-full"></div>
+          <span className="text-yellow-400 text-xs">♪</span>
+          <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-yellow-300 to-transparent rounded-full"></div>
+        </div>
+      </div>
 
       {/* Pack Buttons */}
       <div className="flex justify-center gap-3">
