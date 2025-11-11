@@ -90,6 +90,29 @@ export function ComposerCanvas({
     return 0.5; // Normal when has sources
   };
 
+  // Get pack-specific pastel colors
+  const getPackColors = () => {
+    switch (selectedPack) {
+      case 'adventure':
+        return {
+          border: 'border-green-200',
+          bg: 'bg-green-100',
+        };
+      case 'combat':
+        return {
+          border: 'border-rose-200',
+          bg: 'bg-rose-100',
+        };
+      case 'shelter':
+        return {
+          border: 'border-sky-200',
+          bg: 'bg-sky-100',
+        };
+    }
+  };
+
+  const packColors = getPackColors();
+
   return (
     <div className="flex-1 p-6 relative flex flex-col">
       {/* Controls */}
@@ -128,7 +151,7 @@ export function ComposerCanvas({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className="flex-1 rounded-3xl border-2 border-dashed border-yellow-200 relative overflow-hidden shadow-inner"
+        className={`flex-1 rounded-3xl border-2 border-dashed ${packColors.border} relative overflow-hidden shadow-inner`}
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
         }}
@@ -148,21 +171,15 @@ export function ComposerCanvas({
         <div className="absolute inset-0 bg-white/10" />
 
         {/* Decorative corners */}
-        <div className="absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 border-yellow-200 rounded-tl-2xl z-10" />
-        <div className="absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 border-yellow-200 rounded-tr-2xl z-10" />
-        <div className="absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 border-yellow-200 rounded-bl-2xl z-10" />
-        <div className="absolute bottom-4 right-4 w-10 h-10 border-b-2 border-r-2 border-yellow-200 rounded-br-2xl z-10" />
-
-        {/* Center indicator */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-300 rounded-full shadow-lg z-10" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 border border-yellow-200 rounded-full z-10" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-yellow-100 rounded-full opacity-50 z-10" />
+        <div className={`absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 ${packColors.border} rounded-tl-2xl z-10`} />
+        <div className={`absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 ${packColors.border} rounded-tr-2xl z-10`} />
+        <div className={`absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 ${packColors.border} rounded-bl-2xl z-10`} />
+        <div className={`absolute bottom-4 right-4 w-10 h-10 border-b-2 border-r-2 ${packColors.border} rounded-br-2xl z-10`} />
 
         {/* Empty state */}
         {placedSources.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <div className="text-center text-white drop-shadow-lg">
-              <div className="text-6xl mb-4">🎵</div>
               <p className="text-xl font-bold">Drag and drop sources here!</p>
               <p className="text-sm mt-2">Create your magical soundscape ✨</p>
             </div>

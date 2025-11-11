@@ -40,7 +40,7 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-md flex items-center justify-center">
           <span className="text-white text-lg">♪</span>
         </div>
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold text-gray-600">
           Mini Nore
         </h1>
       </div>
