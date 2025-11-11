@@ -97,16 +97,19 @@ export function ComposerCanvas({
         return {
           border: 'border-green-200',
           bg: 'bg-green-100',
+          buttonGradient: 'from-green-400 to-emerald-400',
         };
       case 'combat':
         return {
           border: 'border-rose-200',
           bg: 'bg-rose-100',
+          buttonGradient: 'from-rose-400 to-red-400',
         };
       case 'shelter':
         return {
           border: 'border-sky-200',
           bg: 'bg-sky-100',
+          buttonGradient: 'from-sky-400 to-blue-400',
         };
     }
   };
@@ -123,7 +126,7 @@ export function ComposerCanvas({
           className={`
             px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
             ${hasPlacedSources
-              ? 'bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
+              ? `bg-gradient-to-r ${packColors.buttonGradient} text-white hover:shadow-xl hover:scale-105 border-white shadow-lg`
               : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
             }
           `}
