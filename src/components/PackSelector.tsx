@@ -19,7 +19,7 @@ const packs = [
     icon: Sword,
     color: 'bg-red-400',
     title: 'Combat Pack',
-    description: 'Rhythmic battle! Fight to win!! ⚔️',
+    description: 'Rhythmic battle! ⚔️',
   },
   {
     id: 'shelter' as PackType,
