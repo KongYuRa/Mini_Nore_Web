@@ -107,39 +107,6 @@ export function PlacedSource({
         >
           <X className="w-4 h-4 text-white" />
         </button>
-
-        {/* Panning indicator lines */}
-        {isPlaying && (
-          <>
-            <motion.div
-              className="absolute top-1/2 left-1/2 w-40 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent -z-10 rounded-full"
-              style={{ transformOrigin: 'left center' }}
-              animate={{
-                scaleX: [1, 1.2, 1],
-                opacity: [0.4, 0.7, 0.4],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 1,
-                ease: 'easeInOut',
-              }}
-            />
-            <motion.div
-              className="absolute top-1/2 left-1/2 w-1 h-40 bg-gradient-to-b from-transparent via-yellow-400 to-transparent -z-10 rounded-full"
-              style={{ transformOrigin: 'center top' }}
-              animate={{
-                scaleY: [1, 1.2, 1],
-                opacity: [0.4, 0.7, 0.4],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 1,
-                ease: 'easeInOut',
-                delay: 0.5,
-              }}
-            />
-          </>
-        )}
       </div>
     </motion.div>
   );
