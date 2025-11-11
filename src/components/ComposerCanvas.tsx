@@ -135,9 +135,11 @@ export function ComposerCanvas({
       >
         {/* Background Image with dynamic opacity */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300"
+          className="absolute inset-0 bg-center transition-opacity duration-300"
           style={{
             backgroundImage: `url(${getPackBackgroundImage()})`,
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'no-repeat',
             opacity: getBackgroundOpacity(),
           }}
         />
