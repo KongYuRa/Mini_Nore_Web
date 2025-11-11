@@ -90,32 +90,6 @@ export function ComposerCanvas({
     return 0.5; // Normal when has sources
   };
 
-  // Get pack-specific pastel colors
-  const getPackColors = () => {
-    switch (selectedPack) {
-      case 'adventure':
-        return {
-          border: 'border-green-200',
-          bg: 'bg-green-100',
-          buttonGradient: 'from-green-400 to-emerald-400',
-        };
-      case 'combat':
-        return {
-          border: 'border-rose-200',
-          bg: 'bg-rose-100',
-          buttonGradient: 'from-rose-400 to-red-400',
-        };
-      case 'shelter':
-        return {
-          border: 'border-sky-200',
-          bg: 'bg-sky-100',
-          buttonGradient: 'from-sky-400 to-blue-400',
-        };
-    }
-  };
-
-  const packColors = getPackColors();
-
   return (
     <div className="flex-1 p-6 relative flex flex-col">
       {/* Controls */}
@@ -126,7 +100,7 @@ export function ComposerCanvas({
           className={`
             px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
             ${hasPlacedSources
-              ? `bg-gradient-to-r ${packColors.buttonGradient} text-white hover:shadow-xl hover:scale-105 border-white shadow-lg`
+              ? 'bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
             }
           `}
@@ -154,7 +128,7 @@ export function ComposerCanvas({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`flex-1 rounded-3xl border-2 border-dashed ${packColors.border} relative overflow-hidden shadow-inner`}
+        className="flex-1 rounded-3xl border-2 border-dashed border-yellow-200 relative overflow-hidden shadow-inner"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
         }}
@@ -174,10 +148,10 @@ export function ComposerCanvas({
         <div className="absolute inset-0 bg-white/10" />
 
         {/* Decorative corners */}
-        <div className={`absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 ${packColors.border} rounded-tl-2xl z-10`} />
-        <div className={`absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 ${packColors.border} rounded-tr-2xl z-10`} />
-        <div className={`absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 ${packColors.border} rounded-bl-2xl z-10`} />
-        <div className={`absolute bottom-4 right-4 w-10 h-10 border-b-2 border-r-2 ${packColors.border} rounded-br-2xl z-10`} />
+        <div className="absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 border-yellow-200 rounded-tl-2xl z-10" />
+        <div className="absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 border-yellow-200 rounded-tr-2xl z-10" />
+        <div className="absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 border-yellow-200 rounded-bl-2xl z-10" />
+        <div className="absolute bottom-4 right-4 w-10 h-10 border-b-2 border-r-2 border-yellow-200 rounded-br-2xl z-10" />
 
         {/* Empty state */}
         {placedSources.length === 0 && (

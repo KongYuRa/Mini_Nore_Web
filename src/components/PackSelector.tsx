@@ -33,29 +33,6 @@ const packs = [
 export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) {
   const selectedPackData = packs.find(pack => pack.id === selectedPack) || packs[0];
 
-  // Get pack-specific colors
-  const getPackColors = () => {
-    switch (selectedPack) {
-      case 'adventure':
-        return {
-          buttonGradient: 'from-green-400 to-emerald-400',
-          border: 'border-green-200',
-        };
-      case 'combat':
-        return {
-          buttonGradient: 'from-rose-400 to-red-400',
-          border: 'border-rose-200',
-        };
-      case 'shelter':
-        return {
-          buttonGradient: 'from-sky-400 to-blue-400',
-          border: 'border-sky-200',
-        };
-    }
-  };
-
-  const packColors = getPackColors();
-
   return (
     <div className="space-y-4 mb-4 w-80">
       {/* Logo/Title */}
@@ -94,12 +71,12 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
 
       {/* Always visible description box */}
       <div className="w-full">
-        <div className={`bg-white rounded-xl shadow-xl border-2 ${packColors.border} p-4 min-h-[140px]`}>
+        <div className="bg-white rounded-xl shadow-xl border-2 border-yellow-200 p-4 min-h-[140px]">
           <div className="relative">
             <h3 className="text-gray-800 font-semibold mb-2">{selectedPackData.title}</h3>
             <p className="text-gray-600 text-sm mb-3 h-5">{selectedPackData.description}</p>
             <button
-              className={`w-full py-2 px-3 bg-gradient-to-r ${packColors.buttonGradient} text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium`}
+              className="w-full py-2 px-3 bg-gradient-to-r from-amber-300 to-yellow-300 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 // Sample music play logic here
