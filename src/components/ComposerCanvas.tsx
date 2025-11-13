@@ -239,12 +239,12 @@ export function ComposerCanvas({
             className={`
               px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
               ${isPlayingAll
-                ? 'bg-gradient-to-r from-orange-400 to-red-400 text-amber-700 hover:shadow-xl hover:scale-105 border-white shadow-lg'
-                : 'bg-gradient-to-r from-purple-400 to-pink-400 text-amber-700 hover:shadow-xl hover:scale-105 border-white shadow-lg'
+                ? 'bg-gradient-to-r from-orange-400 to-red-400 hover:shadow-xl hover:scale-105 border-white shadow-lg'
+                : 'bg-gradient-to-r from-purple-400 to-pink-400 hover:shadow-xl hover:scale-105 border-white shadow-lg'
               }
             `}
           >
-            {isPlayingAll ? <PauseCircle className="w-6 h-6" /> : <PlayCircle className="w-6 h-6" />}
+            {isPlayingAll ? <PauseCircle className="w-6 h-6 text-yellow-700" /> : <PlayCircle className="w-6 h-6 text-yellow-700" />}
           </button>
         </div>
       </div>
