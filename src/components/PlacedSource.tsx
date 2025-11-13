@@ -25,6 +25,7 @@ export function PlacedSource({
 }: PlacedSourceProps) {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('placedId', placed.id);
     onDragStart();
   };
 

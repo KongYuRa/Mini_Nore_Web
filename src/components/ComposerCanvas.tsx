@@ -45,6 +45,15 @@ export function ComposerCanvas({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    // Check if it's a placed source being moved
+    const placedId = e.dataTransfer.getData('placedId');
+    if (placedId) {
+      onMoveSource(placedId, x, y);
+      setDraggingId(null);
+      return;
+    }
+
+    // Otherwise it's a new source being placed
     const sourceData = e.dataTransfer.getData('source');
     if (sourceData) {
       const source = JSON.parse(sourceData) as Source;
@@ -54,7 +63,9 @@ export function ComposerCanvas({
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+    // Set dropEffect based on what's being dragged
+    const placedId = e.dataTransfer.types.includes('placedid');
+    e.dataTransfer.dropEffect = placedId ? 'move' : 'copy';
     setIsDraggingOver(true);
   };
 
