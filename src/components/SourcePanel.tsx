@@ -98,8 +98,8 @@ export function SourcePanel({
         </div>
       </div>
 
-      {/* Volume Controls */}
-      <div className="mt-6">
+      {/* Volume Controls with Credits Overlay */}
+      <div className="mt-6 relative">
         <VolumeControls
           masterVolume={masterVolume}
           musicVolume={musicVolume}
@@ -112,21 +112,8 @@ export function SourcePanel({
           onMusicMutedChange={onMusicMutedChange}
           onAmbienceMutedChange={onAmbienceMutedChange}
         />
-      </div>
 
-      {/* Tutorial Section with Credits Overlay */}
-      <div className="mt-4 relative">
-        <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4">
-          <h3 className="text-gray-800 text-sm mb-2">How to Play</h3>
-          <ul className="text-gray-600 text-xs space-y-1">
-            <li>• Drag sources to canvas</li>
-            <li>• Position creates spatial audio</li>
-            <li>• Click Play to start music</li>
-            <li>• Create your story!</li>
-          </ul>
-        </div>
-
-        {/* Credits Popup - Overlay on top of How to Play */}
+        {/* Credits Popup - Overlay on top of Volume Controls */}
         {showCredits && (
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-2xl p-4 z-10">
             <div className="text-center">

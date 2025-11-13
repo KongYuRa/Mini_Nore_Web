@@ -200,11 +200,7 @@ export function ComposerCanvas({
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <div className="text-center text-white drop-shadow-lg">
               <p className="text-xl font-bold">Drag and drop sources here!</p>
-              <div className="text-sm mt-3 space-y-1">
-                <p><span className="font-semibold">Space:</span> Play/Pause</p>
-                <p><span className="font-semibold">Ctrl+Z:</span> Undo</p>
-                <p><span className="font-semibold">Ctrl+Shift+Z:</span> Redo</p>
-              </div>
+              <p className="text-sm mt-2">Create your magical soundscape</p>
             </div>
           </div>
         )}
