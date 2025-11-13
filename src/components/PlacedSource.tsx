@@ -42,22 +42,23 @@ export function PlacedSource({
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
       onClick={handleClick}
+      className={`
+        group cursor-grab active:cursor-grabbing select-none
+        ${isDragging ? 'opacity-50' : 'opacity-100'}
+      `}
       style={{
         position: 'absolute',
         left: placed.x,
         top: placed.y,
         transform: 'translate(-50%, -50%)',
+        willChange: isDragging ? 'transform' : 'auto',
       }}
-      className={`
-        group cursor-grab active:cursor-grabbing
-        ${isDragging ? 'opacity-50' : 'opacity-100'}
-      `}
       animate={{
-        rotate: isPlaying ? [0, -5, 5, -5, 0] : 0,
+        rotate: isPlaying && !isDragging ? [0, -5, 5, -5, 0] : 0,
       }}
       transition={{
         rotate: {
-          repeat: isPlaying ? Infinity : 0,
+          repeat: isPlaying && !isDragging ? Infinity : 0,
           duration: 0.8,
           ease: 'easeInOut'
         }
@@ -65,7 +66,7 @@ export function PlacedSource({
     >
       <div className="relative">
         {/* Glow effect when playing */}
-        {isPlaying && (
+        {isPlaying && !isDragging && (
           <motion.div
             className="absolute inset-0 rounded-3xl blur-2xl"
             style={{ backgroundColor: source.color }}
@@ -85,7 +86,7 @@ export function PlacedSource({
         <div
           className={`
             relative w-20 h-20 rounded-3xl flex items-center justify-center
-            text-4xl transition-all border-4 border-white
+            text-4xl border-4 border-white
             ${isPlaying ? 'shadow-2xl' : 'shadow-lg'}
           `}
           style={{
@@ -94,7 +95,7 @@ export function PlacedSource({
           }}
         >
           <motion.div
-            animate={isPlaying ? {
+            animate={isPlaying && !isDragging ? {
               y: [0, -5, 0],
               scale: [1, 1.1, 1],
             } : {}}
