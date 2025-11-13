@@ -25,12 +25,7 @@ export function PlacedSource({
 }: PlacedSourceProps) {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.effectAllowed = 'move';
-
-    // Create empty drag image for better performance
-    const emptyImage = new Image();
-    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(emptyImage, 0, 0);
-
+    e.dataTransfer.setData('placedId', placed.id);
     onDragStart();
   };
 
