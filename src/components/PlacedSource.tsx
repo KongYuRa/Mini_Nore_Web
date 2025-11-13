@@ -41,15 +41,12 @@ export function PlacedSource({
         group cursor-grab active:cursor-grabbing
         ${isDragging ? 'opacity-50' : 'opacity-100'}
       `}
-      initial={{ scale: 0 }}
-      animate={{ 
-        scale: 1,
+      animate={{
         rotate: isPlaying ? [0, -5, 5, -5, 0] : 0,
       }}
       transition={{
-        scale: { type: 'spring', stiffness: 500, damping: 30 },
-        rotate: { 
-          repeat: isPlaying ? Infinity : 0, 
+        rotate: {
+          repeat: isPlaying ? Infinity : 0,
           duration: 0.8,
           ease: 'easeInOut'
         }
