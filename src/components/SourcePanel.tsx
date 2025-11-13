@@ -54,7 +54,7 @@ export function SourcePanel({
       />
 
       {/* Sources Grid - Music and Ambience side by side */}
-      <div className="grid grid-cols-2 gap-6 mt-4">
+      <div className="grid grid-cols-2 gap-6 mt-6">
         {/* Music Section */}
         <div className="flex flex-col">
           <div className="flex items-center justify-center py-2 px-4 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-300 text-white shadow-md border-2 border-white mb-3">
@@ -149,13 +149,11 @@ export function SourcePanel({
       </div>
 
       {/* Credits Button */}
-      <div
-        className="mt-4 flex justify-center"
-        onMouseEnter={() => setShowCredits(true)}
-        onMouseLeave={() => setShowCredits(false)}
-      >
+      <div className="mt-4 flex justify-center">
         <button
           className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
+          onMouseEnter={() => setShowCredits(true)}
+          onMouseLeave={() => setShowCredits(false)}
         >
           <Info className="w-5 h-5 text-white" />
         </button>
