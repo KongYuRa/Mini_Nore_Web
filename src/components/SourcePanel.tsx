@@ -1,4 +1,4 @@
-import { PackType, PlacedSourceData } from '../App';
+import { PackType, PlacedSourceData, Source } from '../App';
 import { SourceItem } from './SourceItem';
 import { PackSelector } from './PackSelector';
 import { VolumeControls } from './VolumeControls';
@@ -20,6 +20,8 @@ interface SourcePanelProps {
   onAmbienceVolumeChange: (volume: number) => void;
   onMusicMutedChange: (muted: boolean) => void;
   onAmbienceMutedChange: (muted: boolean) => void;
+  onTouchDragStart?: (source: Source) => void;
+  onTouchDragEnd?: (x: number, y: number) => void;
 }
 
 export function SourcePanel({
@@ -36,6 +38,8 @@ export function SourcePanel({
   onAmbienceVolumeChange,
   onMusicMutedChange,
   onAmbienceMutedChange,
+  onTouchDragStart,
+  onTouchDragEnd,
 }: SourcePanelProps) {
   const [showCredits, setShowCredits] = useState(false);
   const allSources = getPackSources(selectedPack);
@@ -66,10 +70,12 @@ export function SourcePanel({
             {musicSources.map((source) => {
               const isPlaced = placedSourceIds.has(source.id);
               return (
-                <SourceItem 
-                  key={source.id} 
-                  source={source} 
+                <SourceItem
+                  key={source.id}
+                  source={source}
                   isPlaced={isPlaced}
+                  onTouchDragStart={onTouchDragStart}
+                  onTouchDragEnd={onTouchDragEnd}
                 />
               );
             })}
@@ -87,10 +93,12 @@ export function SourcePanel({
             {ambienceSources.map((source) => {
               const isPlaced = placedSourceIds.has(source.id);
               return (
-                <SourceItem 
-                  key={source.id} 
-                  source={source} 
+                <SourceItem
+                  key={source.id}
+                  source={source}
                   isPlaced={isPlaced}
+                  onTouchDragStart={onTouchDragStart}
+                  onTouchDragEnd={onTouchDragEnd}
                 />
               );
             })}
