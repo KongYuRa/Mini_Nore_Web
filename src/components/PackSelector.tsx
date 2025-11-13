@@ -31,7 +31,7 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
   const selectedPackData = packs.find(pack => pack.id === selectedPack) || packs[0];
 
   return (
-    <div className="space-y-6 mb-4 w-80">
+    <div className="space-y-6 mb-4 w-72">
       {/* Logo/Title */}
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-md flex items-center justify-center">
