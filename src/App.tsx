@@ -190,7 +190,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 overflow-hidden flex">
+    <div className="h-screen w-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 overflow-hidden flex select-none">
       {/* Source Panel - Left */}
       <SourcePanel
         selectedPack={selectedPack}
