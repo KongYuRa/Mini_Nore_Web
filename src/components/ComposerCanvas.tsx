@@ -98,70 +98,68 @@ export function ComposerCanvas({
 
   return (
     <div className="flex-1 p-6 relative flex flex-col">
-      {/* 16 Slot Sequencer */}
-      <div className="mb-4">
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl border-2 border-yellow-200 shadow-lg p-4">
-          <div className="flex items-center gap-2">
-            <div className="text-gray-700 font-semibold text-sm mr-2">Scenes:</div>
-            <div className="flex gap-2 flex-1 overflow-x-auto">
-              {scenes.map((scene, index) => {
-                const isEmpty = scene.placedSources.length === 0;
-                const isActive = currentSlot === index;
+      {/* Controls and 16 Slot Sequencer in one row */}
+      <div className="flex gap-3 mb-4">
+        {/* 16 Slot Sequencer */}
+        <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-2xl border-2 border-yellow-200 shadow-lg p-3 overflow-x-auto">
+          <div className="flex gap-2">
+            {scenes.map((scene, index) => {
+              const isEmpty = scene.placedSources.length === 0;
+              const isActive = currentSlot === index;
 
-                return (
-                  <button
-                    key={scene.id}
-                    onClick={() => onSelectSlot(index)}
-                    className={`
-                      min-w-[48px] h-12 rounded-lg flex items-center justify-center
-                      font-semibold text-sm transition-all border-2
-                      ${isActive
-                        ? 'bg-gradient-to-br from-amber-400 to-yellow-400 text-white border-white shadow-lg scale-105'
-                        : isEmpty
-                        ? 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
-                        : 'bg-white text-gray-700 border-yellow-200 hover:bg-yellow-50'
-                      }
-                      ${isPlaying && isActive ? 'ring-4 ring-amber-300 animate-pulse' : ''}
-                    `}
-                  >
-                    {index + 1}
-                  </button>
-                );
-              })}
-            </div>
+              return (
+                <button
+                  key={scene.id}
+                  onClick={() => onSelectSlot(index)}
+                  className={`
+                    min-w-[40px] h-10 rounded-lg flex items-center justify-center
+                    font-semibold text-xs transition-all border-2 flex-shrink-0
+                    ${isActive
+                      ? 'bg-gradient-to-br from-amber-400 to-yellow-400 text-white border-white shadow-lg scale-105'
+                      : isEmpty
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
+                      : 'bg-white text-gray-700 border-yellow-200 hover:bg-yellow-50'
+                    }
+                    ${isPlaying && isActive ? 'ring-4 ring-amber-300 animate-pulse' : ''}
+                  `}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Controls */}
-      <div className="flex justify-end gap-3 mb-4">
-        <button
-          onClick={onTogglePlay}
-          disabled={!hasPlacedSources}
-          className={`
-            px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-            ${hasPlacedSources
-              ? 'bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
-            }
-          `}
-        >
-          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-        </button>
-        
-        <button
-          onClick={onClear}
-          disabled={!hasPlacedSources}
-          className={`
-            px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-            ${hasPlacedSources
-              ? 'bg-white/80 text-red-500 hover:bg-red-50 shadow-md hover:scale-105 border-red-200'
-              : 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-200'
-            }
-          `}
-        >
-          <Trash2 className="w-5 h-5" />
-        </button>
+        {/* Control Buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={onTogglePlay}
+            disabled={!hasPlacedSources}
+            className={`
+              px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
+              ${hasPlacedSources
+                ? 'bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
+              }
+            `}
+          >
+            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+          </button>
+
+          <button
+            onClick={onClear}
+            disabled={!hasPlacedSources}
+            className={`
+              px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
+              ${hasPlacedSources
+                ? 'bg-white/80 text-red-500 hover:bg-red-50 shadow-md hover:scale-105 border-red-200'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-200'
+              }
+            `}
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Canvas */}
