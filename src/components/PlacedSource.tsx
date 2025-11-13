@@ -25,6 +25,12 @@ export function PlacedSource({
 }: PlacedSourceProps) {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.effectAllowed = 'move';
+
+    // Create empty drag image for better performance
+    const emptyImage = new Image();
+    emptyImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    e.dataTransfer.setDragImage(emptyImage, 0, 0);
+
     onDragStart();
   };
 
@@ -41,16 +47,17 @@ export function PlacedSource({
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
       onClick={handleClick}
+      className={`
+        group cursor-grab active:cursor-grabbing select-none
+        ${isDragging ? 'opacity-50' : 'opacity-100'}
+      `}
       style={{
         position: 'absolute',
         left: placed.x,
         top: placed.y,
         transform: 'translate(-50%, -50%)',
+        willChange: isDragging ? 'transform' : 'auto',
       }}
-      className={`
-        group cursor-grab active:cursor-grabbing
-        ${isDragging ? 'opacity-50' : 'opacity-100'}
-      `}
       animate={{
         rotate: isPlaying && !isDragging ? [0, -5, 5, -5, 0] : 0,
       }}
