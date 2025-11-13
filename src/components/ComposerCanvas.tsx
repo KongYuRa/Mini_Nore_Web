@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
-import { Play, Pause, Trash2 } from 'lucide-react';
+import { Play, Pause, PlayCircle, PauseCircle } from 'lucide-react';
 import { triggerHapticFeedback } from '../hooks/useDragAndDrop';
 
 interface ComposerCanvasProps {
@@ -10,6 +10,7 @@ interface ComposerCanvasProps {
   selectedPack: PackType;
   placedSources: PlacedSourceData[];
   isPlaying: boolean;
+  isPlayingAll: boolean;
   scenes: SceneSlot[];
   currentSlot: number;
   onSelectSlot: (slot: number) => void;
@@ -18,7 +19,7 @@ interface ComposerCanvasProps {
   onMoveSource: (id: string, x: number, y: number) => void;
   onToggleMute: (id: string) => void;
   onTogglePlay: () => void;
-  onClear: () => void;
+  onTogglePlayAll: () => void;
 }
 
 export function ComposerCanvas({
@@ -26,6 +27,7 @@ export function ComposerCanvas({
   selectedPack,
   placedSources,
   isPlaying,
+  isPlayingAll,
   scenes,
   currentSlot,
   onSelectSlot,
@@ -34,7 +36,7 @@ export function ComposerCanvas({
   onMoveSource,
   onToggleMute,
   onTogglePlay,
-  onClear,
+  onTogglePlayAll,
 }: ComposerCanvasProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -216,32 +218,33 @@ export function ComposerCanvas({
 
         {/* Control Buttons */}
         <div className="flex gap-3">
+          {/* Current Scene Play/Pause */}
           <button
             onClick={onTogglePlay}
-            disabled={!hasPlacedSources}
+            disabled={!hasPlacedSources || isPlayingAll}
             className={`
               px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-              ${hasPlacedSources
+              ${hasPlacedSources && !isPlayingAll
                 ? 'bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
               }
             `}
           >
-            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            {isPlaying && !isPlayingAll ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
           </button>
 
+          {/* Full Sequence Play/Pause (All Scenes 1-16) */}
           <button
-            onClick={onClear}
-            disabled={!hasPlacedSources}
+            onClick={onTogglePlayAll}
             className={`
               px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-              ${hasPlacedSources
-                ? 'bg-white/80 text-red-500 hover:bg-red-50 shadow-md hover:scale-105 border-red-200'
-                : 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-200'
+              ${isPlayingAll
+                ? 'bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
+                : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
               }
             `}
           >
-            <Trash2 className="w-5 h-5" />
+            {isPlayingAll ? <PauseCircle className="w-5 h-5" /> : <PlayCircle className="w-5 h-5" />}
           </button>
         </div>
       </div>
