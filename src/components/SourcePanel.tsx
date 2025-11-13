@@ -54,7 +54,7 @@ export function SourcePanel({
       />
 
       {/* Sources Grid - Music and Ambience side by side */}
-      <div className="grid grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-2 gap-6 mt-4">
         {/* Music Section */}
         <div className="flex flex-col">
           <div className="flex items-center justify-center py-2 px-4 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-300 text-white shadow-md border-2 border-white mb-3">
