@@ -54,10 +54,12 @@ export default function App() {
   } = useHistory<PackScenes>(initialPackScenes);
   const [currentSlot, setCurrentSlot] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingAll, setIsPlayingAll] = useState(false);
 
   const scenes = allPackScenes[selectedPack];
   const canvasRef = useRef<HTMLDivElement>(null);
   const touchDragSourceRef = useRef<Source | null>(null);
+  const playAllIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Volume controls
   const [masterVolume, setMasterVolume] = useState(1);
@@ -80,6 +82,40 @@ export default function App() {
   });
 
   const currentScene = scenes[currentSlot];
+
+  // Handle full playback (all scenes in sequence)
+  useEffect(() => {
+    if (isPlayingAll) {
+      setIsPlaying(true);
+
+      // Auto-advance to next scene every 4 seconds
+      playAllIntervalRef.current = setInterval(() => {
+        setCurrentSlot((prev) => {
+          const next = prev + 1;
+          if (next >= 16) {
+            // Stop at the end
+            setIsPlayingAll(false);
+            setIsPlaying(false);
+            return 0; // Return to first scene
+          }
+          return next;
+        });
+      }, 4000); // 4 seconds per scene
+
+      return () => {
+        if (playAllIntervalRef.current) {
+          clearInterval(playAllIntervalRef.current);
+          playAllIntervalRef.current = null;
+        }
+      };
+    } else {
+      // Clean up interval when stopping
+      if (playAllIntervalRef.current) {
+        clearInterval(playAllIntervalRef.current);
+        playAllIntervalRef.current = null;
+      }
+    }
+  }, [isPlayingAll]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -170,25 +206,17 @@ export default function App() {
     });
   };
 
-  const handleClearAll = () => {
-    // Get prefix for current pack
-    const packPrefix = selectedPack === 'adventure' ? 'adv-'
-                     : selectedPack === 'combat' ? 'cmb-'
-                     : 'shl-';
-
-    // Remove only sources from current pack in current slot
-    setAllPackScenes({
-      ...allPackScenes,
-      [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
-          ? {
-              ...scene,
-              placedSources: scene.placedSources.filter(s => !s.sourceId.startsWith(packPrefix))
-            }
-          : scene
-      )
-    });
-    setIsPlaying(false);
+  const handleTogglePlayAll = () => {
+    if (isPlayingAll) {
+      // Stop full playback
+      setIsPlayingAll(false);
+      setIsPlaying(false);
+    } else {
+      // Start full playback from beginning
+      setCurrentSlot(0);
+      setIsPlayingAll(true);
+      setIsPlaying(true);
+    }
   };
 
   // Touch drag handlers for SourceItem
@@ -246,6 +274,7 @@ export default function App() {
         selectedPack={selectedPack}
         placedSources={currentScene.placedSources}
         isPlaying={isPlaying}
+        isPlayingAll={isPlayingAll}
         scenes={scenes}
         currentSlot={currentSlot}
         onSelectSlot={setCurrentSlot}
@@ -254,7 +283,7 @@ export default function App() {
         onMoveSource={handleMoveSource}
         onToggleMute={handleToggleMute}
         onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onClear={handleClearAll}
+        onTogglePlayAll={handleTogglePlayAll}
       />
     </div>
   );
