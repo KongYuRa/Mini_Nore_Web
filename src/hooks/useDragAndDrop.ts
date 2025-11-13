@@ -42,10 +42,14 @@ export function useDragAndDrop(options: UseDragAndDropOptions = {}) {
   const [isDragging, setIsDragging] = useState(false);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasDragStartedRef = useRef(false);
+  const isPointerDownRef = useRef(false);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (disabled) return;
+
+      // Mark that pointer is down
+      isPointerDownRef.current = true;
 
       // Capture pointer for smooth tracking
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -78,6 +82,9 @@ export function useDragAndDrop(options: UseDragAndDropOptions = {}) {
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (disabled) return;
+
+      // Only process move if pointer is actually down (prevents hover from triggering)
+      if (!isPointerDownRef.current) return;
 
       const state = dragStateRef.current;
       state.currentX = e.clientX;
@@ -117,6 +124,9 @@ export function useDragAndDrop(options: UseDragAndDropOptions = {}) {
     (e: React.PointerEvent) => {
       if (disabled) return;
 
+      // Mark that pointer is no longer down
+      isPointerDownRef.current = false;
+
       // Release pointer capture
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
 
@@ -145,6 +155,9 @@ export function useDragAndDrop(options: UseDragAndDropOptions = {}) {
   const handlePointerCancel = useCallback(
     (e: React.PointerEvent) => {
       if (disabled) return;
+
+      // Mark that pointer is no longer down
+      isPointerDownRef.current = false;
 
       // Clear long press timer
       if (longPressTimerRef.current) {
