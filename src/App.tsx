@@ -166,19 +166,11 @@ export default function App() {
   };
 
   const handleToggleMute = (id: string) => {
-    // Find the placed source to determine its type
-    const placedSource = currentScene.placedSources.find(s => s.id === id);
-    if (!placedSource) return;
-
-    const packSources = getPackSources(selectedPack);
-    const source = packSources.find(s => s.id === placedSource.sourceId);
-    if (!source) return;
-
-    // If it's an ambience source, toggle mute in all scenes. If music, only current scene.
+    // Toggle mute only in current scene (per-scene for both music and ambience)
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        source.type === 'ambience' || scene.id === currentSlot
+        scene.id === currentSlot
           ? {
               ...scene,
               placedSources: scene.placedSources.map(s =>
@@ -191,19 +183,11 @@ export default function App() {
   };
 
   const handleRemoveSource = (id: string) => {
-    // Find the placed source to determine its type
-    const placedSource = currentScene.placedSources.find(s => s.id === id);
-    if (!placedSource) return;
-
-    const packSources = getPackSources(selectedPack);
-    const source = packSources.find(s => s.id === placedSource.sourceId);
-    if (!source) return;
-
-    // If it's an ambience source, remove from all scenes. If music, only current scene.
+    // Remove only from current scene (per-scene for both music and ambience)
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        source.type === 'ambience' || scene.id === currentSlot
+        scene.id === currentSlot
           ? { ...scene, placedSources: scene.placedSources.filter(s => s.id !== id) }
           : scene
       )
