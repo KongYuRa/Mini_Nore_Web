@@ -3,6 +3,7 @@ import { SourcePanel } from './components/SourcePanel';
 import { ComposerCanvas } from './components/ComposerCanvas';
 import { useAudioManager } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
+import { getPackSources } from './data/sources';
 
 export interface Source {
   id: string;
@@ -153,10 +154,11 @@ export default function App() {
       muted: false,
     };
 
+    // If it's an ambience source, add to all scenes. If music, only current scene.
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
+        source.type === 'ambience' || scene.id === currentSlot
           ? { ...scene, placedSources: [...scene.placedSources, newPlaced] }
           : scene
       )
@@ -164,10 +166,19 @@ export default function App() {
   };
 
   const handleToggleMute = (id: string) => {
+    // Find the placed source to determine its type
+    const placedSource = currentScene.placedSources.find(s => s.id === id);
+    if (!placedSource) return;
+
+    const packSources = getPackSources(selectedPack);
+    const source = packSources.find(s => s.id === placedSource.sourceId);
+    if (!source) return;
+
+    // If it's an ambience source, toggle mute in all scenes. If music, only current scene.
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
+        source.type === 'ambience' || scene.id === currentSlot
           ? {
               ...scene,
               placedSources: scene.placedSources.map(s =>
@@ -180,10 +191,19 @@ export default function App() {
   };
 
   const handleRemoveSource = (id: string) => {
+    // Find the placed source to determine its type
+    const placedSource = currentScene.placedSources.find(s => s.id === id);
+    if (!placedSource) return;
+
+    const packSources = getPackSources(selectedPack);
+    const source = packSources.find(s => s.id === placedSource.sourceId);
+    if (!source) return;
+
+    // If it's an ambience source, remove from all scenes. If music, only current scene.
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
+        source.type === 'ambience' || scene.id === currentSlot
           ? { ...scene, placedSources: scene.placedSources.filter(s => s.id !== id) }
           : scene
       )
@@ -191,10 +211,19 @@ export default function App() {
   };
 
   const handleMoveSource = (id: string, x: number, y: number) => {
+    // Find the placed source to determine its type
+    const placedSource = currentScene.placedSources.find(s => s.id === id);
+    if (!placedSource) return;
+
+    const packSources = getPackSources(selectedPack);
+    const source = packSources.find(s => s.id === placedSource.sourceId);
+    if (!source) return;
+
+    // If it's an ambience source, move in all scenes. If music, only current scene.
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
+        source.type === 'ambience' || scene.id === currentSlot
           ? {
               ...scene,
               placedSources: scene.placedSources.map(s =>
