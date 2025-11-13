@@ -1,4 +1,5 @@
 import { Volume2, VolumeX, Music as MusicIcon, Wind } from 'lucide-react';
+import React from 'react';
 
 interface VolumeControlsProps {
   masterVolume: number;
@@ -25,41 +26,44 @@ export function VolumeControls({
   onMusicMutedChange,
   onAmbienceMutedChange,
 }: VolumeControlsProps) {
+  const [masterMuted, setMasterMuted] = React.useState(false);
+
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl border-2 border-blue-300 shadow-md p-4">
-      <h3 className="text-gray-800 font-bold text-sm mb-3">Volume Controls</h3>
+    <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl border-2 border-blue-300 shadow-md p-3">
+      <h3 className="text-gray-800 font-bold text-sm mb-2">Volume</h3>
 
       {/* Master Volume */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Volume2 className="w-4 h-4 text-gray-700" />
-          <span className="text-xs font-semibold text-gray-700">Master</span>
-        </div>
+      <div className="flex items-center gap-2 mb-2">
+        <button
+          onClick={() => setMasterMuted(!masterMuted)}
+          className="flex-shrink-0 p-1 rounded transition-colors hover:bg-white/50"
+        >
+          {masterMuted ? <VolumeX className="w-4 h-4 text-gray-700" /> : <Volume2 className="w-4 h-4 text-gray-700" />}
+        </button>
+        <span className="text-xs font-semibold text-gray-700 w-12">Master</span>
         <input
           type="range"
           min="0"
           max="1"
           step="0.01"
-          value={masterVolume}
-          onChange={(e) => onMasterVolumeChange(parseFloat(e.target.value))}
-          className="w-full h-2 bg-gradient-to-r from-yellow-200 to-orange-200 rounded-lg appearance-none cursor-pointer slider"
+          value={masterMuted ? 0 : masterVolume}
+          onChange={(e) => {
+            onMasterVolumeChange(parseFloat(e.target.value));
+            if (parseFloat(e.target.value) > 0) setMasterMuted(false);
+          }}
+          className="flex-1 h-2 bg-gradient-to-r from-yellow-200 to-orange-200 rounded-lg appearance-none cursor-pointer"
         />
       </div>
 
       {/* Music Volume */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <MusicIcon className="w-4 h-4 text-amber-600" />
-          <span className="text-xs font-semibold text-gray-700">Music</span>
-          <button
-            onClick={() => onMusicMutedChange(!musicMuted)}
-            className={`ml-auto p-1 rounded transition-colors ${
-              musicMuted ? 'bg-red-400 text-white' : 'bg-white/70 text-gray-600 hover:bg-white'
-            }`}
-          >
-            {musicMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
-        </div>
+      <div className="flex items-center gap-2 mb-2">
+        <button
+          onClick={() => onMusicMutedChange(!musicMuted)}
+          className="flex-shrink-0 p-1 rounded transition-colors hover:bg-white/50"
+        >
+          {musicMuted ? <VolumeX className="w-4 h-4 text-amber-600" /> : <MusicIcon className="w-4 h-4 text-amber-600" />}
+        </button>
+        <span className="text-xs font-semibold text-gray-700 w-12">Music</span>
         <input
           type="range"
           min="0"
@@ -68,24 +72,19 @@ export function VolumeControls({
           value={musicVolume}
           onChange={(e) => onMusicVolumeChange(parseFloat(e.target.value))}
           disabled={musicMuted}
-          className="w-full h-2 bg-gradient-to-r from-amber-200 to-yellow-200 rounded-lg appearance-none cursor-pointer slider disabled:opacity-50"
+          className="flex-1 h-2 bg-gradient-to-r from-amber-200 to-yellow-200 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
         />
       </div>
 
       {/* Ambience Volume */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Wind className="w-4 h-4 text-orange-600" />
-          <span className="text-xs font-semibold text-gray-700">Ambience</span>
-          <button
-            onClick={() => onAmbienceMutedChange(!ambienceMuted)}
-            className={`ml-auto p-1 rounded transition-colors ${
-              ambienceMuted ? 'bg-red-400 text-white' : 'bg-white/70 text-gray-600 hover:bg-white'
-            }`}
-          >
-            {ambienceMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </button>
-        </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onAmbienceMutedChange(!ambienceMuted)}
+          className="flex-shrink-0 p-1 rounded transition-colors hover:bg-white/50"
+        >
+          {ambienceMuted ? <VolumeX className="w-4 h-4 text-orange-600" /> : <Wind className="w-4 h-4 text-orange-600" />}
+        </button>
+        <span className="text-xs font-semibold text-gray-700 w-12">Ambient</span>
         <input
           type="range"
           min="0"
@@ -94,7 +93,7 @@ export function VolumeControls({
           value={ambienceVolume}
           onChange={(e) => onAmbienceVolumeChange(parseFloat(e.target.value))}
           disabled={ambienceMuted}
-          className="w-full h-2 bg-gradient-to-r from-orange-200 to-amber-200 rounded-lg appearance-none cursor-pointer slider disabled:opacity-50"
+          className="flex-1 h-2 bg-gradient-to-r from-orange-200 to-amber-200 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
         />
       </div>
     </div>

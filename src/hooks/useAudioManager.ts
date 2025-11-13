@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { PlacedSourceData, SceneSlot, PackType } from '../App';
 
+type PackScenes = Record<PackType, SceneSlot[]>;
+
 interface AudioManagerProps {
-  scenes: SceneSlot[];
+  scenes: PackScenes;
   currentSlot: number;
   isPlaying: boolean;
   selectedPack: PackType;
@@ -95,7 +97,8 @@ export function useAudioManager({
         audioContextRef.current.resume();
       }
 
-      const currentScene = scenes[currentSlot];
+      const currentPackScenes = scenes[selectedPack];
+      const currentScene = currentPackScenes[currentSlot];
 
       // Get pack prefix
       const packPrefix = selectedPack === 'adventure' ? 'adv-'

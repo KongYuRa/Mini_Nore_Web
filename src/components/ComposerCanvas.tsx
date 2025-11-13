@@ -14,6 +14,7 @@ interface ComposerCanvasProps {
   onPlaceSource: (source: Source, x: number, y: number) => void;
   onRemoveSource: (id: string) => void;
   onMoveSource: (id: string, x: number, y: number) => void;
+  onToggleMute: (id: string) => void;
   onTogglePlay: () => void;
   onClear: () => void;
 }
@@ -28,6 +29,7 @@ export function ComposerCanvas({
   onPlaceSource,
   onRemoveSource,
   onMoveSource,
+  onToggleMute,
   onTogglePlay,
   onClear,
 }: ComposerCanvasProps) {
@@ -100,9 +102,9 @@ export function ComposerCanvas({
     <div className="flex-1 p-6 relative flex flex-col">
       {/* Controls and 16 Slot Sequencer in one row */}
       <div className="flex gap-3 mb-4">
-        {/* 16 Slot Sequencer */}
-        <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-2xl border-2 border-yellow-200 shadow-lg p-3 overflow-x-auto">
-          <div className="flex gap-2">
+        {/* 16 Slot Sequencer - Unified Bar */}
+        <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-xl border-2 border-yellow-200 shadow-lg overflow-hidden">
+          <div className="flex h-12">
             {scenes.map((scene, index) => {
               const isEmpty = scene.placedSources.length === 0;
               const isActive = currentSlot === index;
@@ -112,15 +114,16 @@ export function ComposerCanvas({
                   key={scene.id}
                   onClick={() => onSelectSlot(index)}
                   className={`
-                    min-w-[40px] h-10 rounded-lg flex items-center justify-center
-                    font-semibold text-xs transition-all border-2 flex-shrink-0
+                    flex-1 flex items-center justify-center
+                    font-semibold text-xs transition-all
+                    border-r border-yellow-200 last:border-r-0
                     ${isActive
-                      ? 'bg-gradient-to-br from-amber-400 to-yellow-400 text-white border-white shadow-lg scale-105'
+                      ? 'bg-gradient-to-br from-amber-400 to-yellow-400 text-white shadow-inner'
                       : isEmpty
-                      ? 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
-                      : 'bg-white text-gray-700 border-yellow-200 hover:bg-yellow-50'
+                      ? 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                      : 'bg-white text-gray-700 hover:bg-yellow-50'
                     }
-                    ${isPlaying && isActive ? 'ring-4 ring-amber-300 animate-pulse' : ''}
+                    ${isPlaying && isActive ? 'animate-pulse' : ''}
                   `}
                 >
                   {index + 1}
@@ -215,6 +218,7 @@ export function ComposerCanvas({
               isPlaying={isPlaying}
               isDragging={draggingId === placed.id}
               onRemove={() => onRemoveSource(placed.id)}
+              onToggleMute={() => onToggleMute(placed.id)}
               onDragStart={() => handlePlacedDragStart(placed.id)}
               onDragEnd={(e) => handlePlacedDragEnd(e, placed.id)}
             />
