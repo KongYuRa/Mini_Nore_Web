@@ -88,44 +88,38 @@ export function SourcePanel({ selectedPack, placedSources, onSelectPack }: Sourc
       </div>
 
       {/* Credits Button */}
-      <div className="mt-4 flex justify-center relative">
-        <button
-          onMouseEnter={() => setShowCredits(true)}
-          onMouseLeave={() => setShowCredits(false)}
-          className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
-        >
-          <Info className="w-5 h-5 text-white" />
-        </button>
-
+      <div
+        className="mt-4 flex flex-col items-center relative"
+        onMouseEnter={() => setShowCredits(true)}
+        onMouseLeave={() => setShowCredits(false)}
+      >
         {/* Credits Popup */}
         {showCredits && (
-          <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-64 bg-white rounded-2xl shadow-2xl border-2 border-yellow-200 p-5 z-50">
+          <div className="w-full bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4 mb-2">
             <div className="text-center">
-              <div className="text-2xl mb-3">🎵</div>
-              <h3 className="text-gray-800 font-bold text-lg mb-4 bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
-                Credits
-              </h3>
+              <div className="text-2xl mb-2">🎵</div>
+              <h3 className="text-gray-800 font-bold text-sm mb-3">Credits</h3>
 
-              <div className="space-y-4 text-left">
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-3 border border-yellow-200">
+              <div className="space-y-3 text-left">
+                <div className="bg-white/70 rounded-xl p-3 border border-yellow-200">
                   <p className="font-semibold text-gray-800 text-sm">Yu Ra Kong</p>
                   <p className="text-gray-600 text-xs mt-1">Develop & Art & Sound Design</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-3 border border-yellow-200">
+                <div className="bg-white/70 rounded-xl p-3 border border-yellow-200">
                   <p className="font-semibold text-gray-800 text-sm">Da Hyun Kim</p>
                   <p className="text-gray-600 text-xs mt-1">Composition</p>
                 </div>
               </div>
             </div>
-
-            {/* Arrow pointer */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-              <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-yellow-200"></div>
-              <div className="w-0 h-0 border-l-7 border-r-7 border-t-7 border-transparent border-t-white absolute bottom-0.5 left-1/2 transform -translate-x-1/2"></div>
-            </div>
           </div>
         )}
+
+        <button
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
+        >
+          <Info className="w-5 h-5 text-white" />
+        </button>
       </div>
     </div>
   );
