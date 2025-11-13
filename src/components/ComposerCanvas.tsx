@@ -118,14 +118,13 @@ export function ComposerCanvas({
                     font-bold text-sm transition-all
                     border-r border-yellow-200 last:border-r-0
                     ${isActive
-                      ? 'bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-inner'
+                      ? 'bg-gradient-to-br from-amber-600 to-orange-600 text-gray-800 shadow-inner'
                       : isEmpty
                       ? 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                       : 'bg-white text-gray-700 hover:bg-yellow-50'
                     }
                     ${isPlaying && isActive ? 'animate-pulse' : ''}
                   `}
-                  style={isActive ? { textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' } : undefined}
                 >
                   {index + 1}
                 </button>
