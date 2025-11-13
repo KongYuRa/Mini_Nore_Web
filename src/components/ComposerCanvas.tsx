@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Source, PlacedSourceData, PackType } from '../App';
+import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
 import { Play, Pause, Trash2 } from 'lucide-react';
@@ -8,6 +8,9 @@ interface ComposerCanvasProps {
   selectedPack: PackType;
   placedSources: PlacedSourceData[];
   isPlaying: boolean;
+  scenes: SceneSlot[];
+  currentSlot: number;
+  onSelectSlot: (slot: number) => void;
   onPlaceSource: (source: Source, x: number, y: number) => void;
   onRemoveSource: (id: string) => void;
   onMoveSource: (id: string, x: number, y: number) => void;
@@ -19,6 +22,9 @@ export function ComposerCanvas({
   selectedPack,
   placedSources,
   isPlaying,
+  scenes,
+  currentSlot,
+  onSelectSlot,
   onPlaceSource,
   onRemoveSource,
   onMoveSource,
@@ -92,6 +98,41 @@ export function ComposerCanvas({
 
   return (
     <div className="flex-1 p-6 relative flex flex-col">
+      {/* 16 Slot Sequencer */}
+      <div className="mb-4">
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl border-2 border-yellow-200 shadow-lg p-4">
+          <div className="flex items-center gap-2">
+            <div className="text-gray-700 font-semibold text-sm mr-2">Scenes:</div>
+            <div className="flex gap-2 flex-1 overflow-x-auto">
+              {scenes.map((scene, index) => {
+                const isEmpty = scene.placedSources.length === 0;
+                const isActive = currentSlot === index;
+
+                return (
+                  <button
+                    key={scene.id}
+                    onClick={() => onSelectSlot(index)}
+                    className={`
+                      min-w-[48px] h-12 rounded-lg flex items-center justify-center
+                      font-semibold text-sm transition-all border-2
+                      ${isActive
+                        ? 'bg-gradient-to-br from-amber-400 to-yellow-400 text-white border-white shadow-lg scale-105'
+                        : isEmpty
+                        ? 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-gray-200'
+                        : 'bg-white text-gray-700 border-yellow-200 hover:bg-yellow-50'
+                      }
+                      ${isPlaying && isActive ? 'ring-4 ring-amber-300 animate-pulse' : ''}
+                    `}
+                  >
+                    {index + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="flex justify-end gap-3 mb-4">
         <button

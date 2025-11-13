@@ -1,6 +1,7 @@
 import { PackType, PlacedSourceData } from '../App';
 import { SourceItem } from './SourceItem';
 import { PackSelector } from './PackSelector';
+import { VolumeControls } from './VolumeControls';
 import { getPackSources } from '../data/sources';
 import { Music, Wind, Info } from 'lucide-react';
 import { useState } from 'react';
@@ -9,9 +10,33 @@ interface SourcePanelProps {
   selectedPack: PackType;
   placedSources: PlacedSourceData[];
   onSelectPack: (pack: PackType) => void;
+  masterVolume: number;
+  musicVolume: number;
+  ambienceVolume: number;
+  musicMuted: boolean;
+  ambienceMuted: boolean;
+  onMasterVolumeChange: (volume: number) => void;
+  onMusicVolumeChange: (volume: number) => void;
+  onAmbienceVolumeChange: (volume: number) => void;
+  onMusicMutedChange: (muted: boolean) => void;
+  onAmbienceMutedChange: (muted: boolean) => void;
 }
 
-export function SourcePanel({ selectedPack, placedSources, onSelectPack }: SourcePanelProps) {
+export function SourcePanel({
+  selectedPack,
+  placedSources,
+  onSelectPack,
+  masterVolume,
+  musicVolume,
+  ambienceVolume,
+  musicMuted,
+  ambienceMuted,
+  onMasterVolumeChange,
+  onMusicVolumeChange,
+  onAmbienceVolumeChange,
+  onMusicMutedChange,
+  onAmbienceMutedChange,
+}: SourcePanelProps) {
   const [showCredits, setShowCredits] = useState(false);
   const allSources = getPackSources(selectedPack);
   const musicSources = allSources.filter(s => s.type === 'music');
@@ -27,6 +52,22 @@ export function SourcePanel({ selectedPack, placedSources, onSelectPack }: Sourc
         selectedPack={selectedPack}
         onSelectPack={onSelectPack}
       />
+
+      {/* Volume Controls */}
+      <div className="mt-4">
+        <VolumeControls
+          masterVolume={masterVolume}
+          musicVolume={musicVolume}
+          ambienceVolume={ambienceVolume}
+          musicMuted={musicMuted}
+          ambienceMuted={ambienceMuted}
+          onMasterVolumeChange={onMasterVolumeChange}
+          onMusicVolumeChange={onMusicVolumeChange}
+          onAmbienceVolumeChange={onAmbienceVolumeChange}
+          onMusicMutedChange={onMusicMutedChange}
+          onAmbienceMutedChange={onAmbienceMutedChange}
+        />
+      </div>
 
       {/* Sources Grid - Music and Ambience side by side */}
       <div className="grid grid-cols-2 gap-6 mt-4">
