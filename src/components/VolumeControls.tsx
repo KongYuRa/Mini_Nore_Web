@@ -26,7 +26,7 @@ export function VolumeControls({
   onAmbienceMutedChange,
 }: VolumeControlsProps) {
   return (
-    <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4">
+    <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl border-2 border-blue-300 shadow-md p-4">
       <h3 className="text-gray-800 font-bold text-sm mb-3">Volume Controls</h3>
 
       {/* Master Volume */}
