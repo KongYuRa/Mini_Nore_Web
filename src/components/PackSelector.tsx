@@ -1,5 +1,5 @@
 import { PackType } from '../App';
-import { Sword, Mountain, Home, Music } from 'lucide-react';
+import { Sword, Mountain, Home, Music, Wind } from 'lucide-react';
 
 interface PackSelectorProps {
   selectedPack: PackType;
@@ -12,21 +12,21 @@ const packs = [
     icon: Mountain,
     color: 'bg-green-400',
     title: 'Adventure Pack',
-    description: 'Bright & exciting! 🌾',
+    description: 'Bright & exciting!',
   },
   {
     id: 'combat' as PackType,
     icon: Sword,
     color: 'bg-red-400',
     title: 'Combat Pack',
-    description: 'Rhythmic battle! ⚔️',
+    description: 'Rhythmic battle!',
   },
   {
     id: 'shelter' as PackType,
     icon: Home,
     color: 'bg-blue-400',
     title: 'Shelter Pack',
-    description: 'Warm & mystical rest time 🏡',
+    description: 'Warm & mystical rest time',
   },
 ];
 
@@ -75,17 +75,30 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
           <div className="relative">
             <h3 className="text-gray-800 font-semibold mb-2">{selectedPackData.title}</h3>
             <p className="text-gray-600 text-sm mb-3 h-5">{selectedPackData.description}</p>
-            <button
-              className="w-full py-2 px-3 bg-gradient-to-r from-amber-300 to-yellow-300 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Sample music play logic here
-                console.log(`Playing sample for ${selectedPackData.title}`);
-              }}
-            >
-              <Music className="w-4 h-4" />
-              <span>Sample Song</span>
-            </button>
+            <div className="space-y-2">
+              <button
+                className="w-full py-2 px-3 bg-gradient-to-r from-amber-300 to-yellow-300 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Sample music play logic here
+                  console.log(`Playing sample for ${selectedPackData.title}`);
+                }}
+              >
+                <Music className="w-4 h-4" />
+                <span>Sample Song</span>
+              </button>
+              <button
+                className="w-full py-2 px-3 bg-gradient-to-r from-orange-300 to-amber-300 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Sample ambient play logic here
+                  console.log(`Playing ambient sample for ${selectedPackData.title}`);
+                }}
+              >
+                <Wind className="w-4 h-4" />
+                <span>Sample Ambient</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

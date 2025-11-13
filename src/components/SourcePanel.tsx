@@ -76,7 +76,6 @@ export function SourcePanel({ selectedPack, placedSources, onSelectPack }: Sourc
       {/* Tutorial Section */}
       <div className="mt-6">
         <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4">
-          <div className="text-2xl mb-2 text-center">✨</div>
           <h3 className="text-gray-800 text-sm mb-2">How to Play</h3>
           <ul className="text-gray-600 text-xs space-y-1">
             <li>• Drag sources to canvas</li>
@@ -97,7 +96,6 @@ export function SourcePanel({ selectedPack, placedSources, onSelectPack }: Sourc
         {showCredits && (
           <div className="w-full bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4 mb-2">
             <div className="text-center">
-              <div className="text-2xl mb-2">🎵</div>
               <h3 className="text-gray-800 font-bold text-sm mb-3">Credits</h3>
 
               <div className="space-y-3 text-left">
