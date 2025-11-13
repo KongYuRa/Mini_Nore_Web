@@ -53,22 +53,6 @@ export function SourcePanel({
         onSelectPack={onSelectPack}
       />
 
-      {/* Volume Controls */}
-      <div className="mt-4">
-        <VolumeControls
-          masterVolume={masterVolume}
-          musicVolume={musicVolume}
-          ambienceVolume={ambienceVolume}
-          musicMuted={musicMuted}
-          ambienceMuted={ambienceMuted}
-          onMasterVolumeChange={onMasterVolumeChange}
-          onMusicVolumeChange={onMusicVolumeChange}
-          onAmbienceVolumeChange={onAmbienceVolumeChange}
-          onMusicMutedChange={onMusicMutedChange}
-          onAmbienceMutedChange={onAmbienceMutedChange}
-        />
-      </div>
-
       {/* Sources Grid - Music and Ambience side by side */}
       <div className="grid grid-cols-2 gap-6 mt-4">
         {/* Music Section */}
@@ -114,8 +98,8 @@ export function SourcePanel({
         </div>
       </div>
 
-      {/* Tutorial Section */}
-      <div className="mt-6">
+      {/* Tutorial Section with Credits Overlay */}
+      <div className="mt-6 relative">
         <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4">
           <h3 className="text-gray-800 text-sm mb-2">How to Play</h3>
           <ul className="text-gray-600 text-xs space-y-1">
@@ -125,17 +109,10 @@ export function SourcePanel({
             <li>• Create your story!</li>
           </ul>
         </div>
-      </div>
 
-      {/* Credits Button */}
-      <div
-        className="mt-4 flex flex-col items-center relative"
-        onMouseEnter={() => setShowCredits(true)}
-        onMouseLeave={() => setShowCredits(false)}
-      >
-        {/* Credits Popup */}
+        {/* Credits Popup - Overlay on top of How to Play */}
         {showCredits && (
-          <div className="w-full bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4 mb-2">
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-2xl p-4 z-10">
             <div className="text-center">
               <h3 className="text-gray-800 font-bold text-sm mb-3">Credits</h3>
 
@@ -153,7 +130,30 @@ export function SourcePanel({
             </div>
           </div>
         )}
+      </div>
 
+      {/* Volume Controls */}
+      <div className="mt-4">
+        <VolumeControls
+          masterVolume={masterVolume}
+          musicVolume={musicVolume}
+          ambienceVolume={ambienceVolume}
+          musicMuted={musicMuted}
+          ambienceMuted={ambienceMuted}
+          onMasterVolumeChange={onMasterVolumeChange}
+          onMusicVolumeChange={onMusicVolumeChange}
+          onAmbienceVolumeChange={onAmbienceVolumeChange}
+          onMusicMutedChange={onMusicMutedChange}
+          onAmbienceMutedChange={onAmbienceMutedChange}
+        />
+      </div>
+
+      {/* Credits Button */}
+      <div
+        className="mt-4 flex justify-center"
+        onMouseEnter={() => setShowCredits(true)}
+        onMouseLeave={() => setShowCredits(false)}
+      >
         <button
           className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
         >
