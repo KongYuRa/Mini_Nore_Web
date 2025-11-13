@@ -8,6 +8,7 @@ interface PlacedSourceProps {
   isPlaying: boolean;
   isDragging: boolean;
   onRemove: () => void;
+  onToggleMute: () => void;
   onDragStart: () => void;
   onDragEnd: (e: React.DragEvent) => void;
 }
@@ -18,6 +19,7 @@ export function PlacedSource({
   isPlaying,
   isDragging,
   onRemove,
+  onToggleMute,
   onDragStart,
   onDragEnd,
 }: PlacedSourceProps) {
@@ -26,11 +28,19 @@ export function PlacedSource({
     onDragStart();
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Only toggle mute on direct click, not during drag
+    if (e.detail === 1) {
+      onToggleMute();
+    }
+  };
+
   return (
     <motion.div
       draggable
       onDragStart={handleDragStart}
       onDragEnd={onDragEnd}
+      onClick={handleClick}
       style={{
         position: 'absolute',
         left: placed.x,
@@ -78,7 +88,7 @@ export function PlacedSource({
             ${isPlaying ? 'shadow-2xl' : 'shadow-lg'}
           `}
           style={{
-            backgroundColor: source.color,
+            backgroundColor: placed.muted ? '#9ca3af' : source.color,
             opacity: isPlaying ? 1 : 0.8,
           }}
         >

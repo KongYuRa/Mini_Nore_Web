@@ -18,6 +18,7 @@ export interface PlacedSourceData {
   x: number;
   y: number;
   volume: number;
+  muted?: boolean;
 }
 
 export interface SceneSlot {
@@ -27,23 +28,34 @@ export interface SceneSlot {
 
 export type PackType = 'adventure' | 'combat' | 'shelter';
 
-const initialScenes: SceneSlot[] = Array.from({ length: 16 }, (_, i) => ({
-  id: i,
-  placedSources: [],
-}));
+type PackScenes = Record<PackType, SceneSlot[]>;
+
+const createInitialScenes = (): SceneSlot[] =>
+  Array.from({ length: 16 }, (_, i) => ({
+    id: i,
+    placedSources: [],
+  }));
+
+const initialPackScenes: PackScenes = {
+  adventure: createInitialScenes(),
+  combat: createInitialScenes(),
+  shelter: createInitialScenes(),
+};
 
 export default function App() {
   const [selectedPack, setSelectedPack] = useState<PackType>('adventure');
   const {
-    state: scenes,
-    setState: setScenes,
+    state: allPackScenes,
+    setState: setAllPackScenes,
     undo,
     redo,
     canUndo,
     canRedo,
-  } = useHistory<SceneSlot[]>(initialScenes);
+  } = useHistory<PackScenes>(initialPackScenes);
   const [currentSlot, setCurrentSlot] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const scenes = allPackScenes[selectedPack];
 
   // Volume controls
   const [masterVolume, setMasterVolume] = useState(1);
@@ -54,7 +66,7 @@ export default function App() {
 
   // Audio manager
   useAudioManager({
-    scenes,
+    scenes: allPackScenes,
     currentSlot,
     isPlaying,
     selectedPack,
@@ -100,34 +112,60 @@ export default function App() {
       x,
       y,
       volume: 1,
+      muted: false,
     };
 
-    setScenes(scenes.map(scene =>
-      scene.id === currentSlot
-        ? { ...scene, placedSources: [...scene.placedSources, newPlaced] }
-        : scene
-    ));
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: scenes.map(scene =>
+        scene.id === currentSlot
+          ? { ...scene, placedSources: [...scene.placedSources, newPlaced] }
+          : scene
+      )
+    });
+  };
+
+  const handleToggleMute = (id: string) => {
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: scenes.map(scene =>
+        scene.id === currentSlot
+          ? {
+              ...scene,
+              placedSources: scene.placedSources.map(s =>
+                s.id === id ? { ...s, muted: !s.muted } : s
+              )
+            }
+          : scene
+      )
+    });
   };
 
   const handleRemoveSource = (id: string) => {
-    setScenes(scenes.map(scene =>
-      scene.id === currentSlot
-        ? { ...scene, placedSources: scene.placedSources.filter(s => s.id !== id) }
-        : scene
-    ));
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: scenes.map(scene =>
+        scene.id === currentSlot
+          ? { ...scene, placedSources: scene.placedSources.filter(s => s.id !== id) }
+          : scene
+      )
+    });
   };
 
   const handleMoveSource = (id: string, x: number, y: number) => {
-    setScenes(scenes.map(scene =>
-      scene.id === currentSlot
-        ? {
-            ...scene,
-            placedSources: scene.placedSources.map(s =>
-              s.id === id ? { ...s, x, y } : s
-            )
-          }
-        : scene
-    ));
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: scenes.map(scene =>
+        scene.id === currentSlot
+          ? {
+              ...scene,
+              placedSources: scene.placedSources.map(s =>
+                s.id === id ? { ...s, x, y } : s
+              )
+            }
+          : scene
+      )
+    });
   };
 
   const handleClearAll = () => {
@@ -137,14 +175,17 @@ export default function App() {
                      : 'shl-';
 
     // Remove only sources from current pack in current slot
-    setScenes(scenes.map(scene =>
-      scene.id === currentSlot
-        ? {
-            ...scene,
-            placedSources: scene.placedSources.filter(s => !s.sourceId.startsWith(packPrefix))
-          }
-        : scene
-    ));
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: scenes.map(scene =>
+        scene.id === currentSlot
+          ? {
+              ...scene,
+              placedSources: scene.placedSources.filter(s => !s.sourceId.startsWith(packPrefix))
+            }
+          : scene
+      )
+    });
     setIsPlaying(false);
   };
 
@@ -178,6 +219,7 @@ export default function App() {
         onPlaceSource={handlePlaceSource}
         onRemoveSource={handleRemoveSource}
         onMoveSource={handleMoveSource}
+        onToggleMute={handleToggleMute}
         onTogglePlay={() => setIsPlaying(!isPlaying)}
         onClear={handleClearAll}
       />
