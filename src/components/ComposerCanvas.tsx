@@ -115,10 +115,10 @@ export function ComposerCanvas({
                   onClick={() => onSelectSlot(index)}
                   className={`
                     flex-1 flex items-center justify-center
-                    font-semibold text-xs transition-all
+                    font-bold text-sm transition-all
                     border-r border-yellow-200 last:border-r-0
                     ${isActive
-                      ? 'bg-gradient-to-br from-amber-400 to-yellow-400 text-white shadow-inner'
+                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-inner'
                       : isEmpty
                       ? 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                       : 'bg-white text-gray-700 hover:bg-yellow-50'

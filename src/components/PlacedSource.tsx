@@ -109,10 +109,13 @@ export function PlacedSource({
 
         {/* Remove button */}
         <button
-          onClick={onRemove}
-          className="absolute -top-2 -right-2 w-8 h-8 bg-red-400 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-500 border-2 border-white"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="absolute -top-2 -right-2 w-8 h-8 bg-red-400 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-500 border-2 border-white z-20"
         >
-          <X className="w-4 h-4 text-white" />
+          <X className="w-4 h-4 text-white pointer-events-none" />
         </button>
       </div>
     </motion.div>

@@ -29,18 +29,18 @@ export function VolumeControls({
   const [masterMuted, setMasterMuted] = React.useState(false);
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl border-2 border-blue-300 shadow-md p-3">
-      <h3 className="text-gray-800 font-bold text-sm mb-2">Volume</h3>
+    <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl border-2 border-blue-300 shadow-md p-4">
+      <h3 className="text-gray-800 font-bold text-sm mb-3">Volume</h3>
 
       {/* Master Volume */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-3">
         <button
           onClick={() => setMasterMuted(!masterMuted)}
           className="flex-shrink-0 p-1 rounded transition-colors hover:bg-white/50"
         >
           {masterMuted ? <VolumeX className="w-4 h-4 text-gray-700" /> : <Volume2 className="w-4 h-4 text-gray-700" />}
         </button>
-        <span className="text-xs font-semibold text-gray-700 w-12">Master</span>
+        <span className="text-xs font-semibold text-gray-700 w-14">Master</span>
         <input
           type="range"
           min="0"
@@ -56,14 +56,14 @@ export function VolumeControls({
       </div>
 
       {/* Music Volume */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-3">
         <button
           onClick={() => onMusicMutedChange(!musicMuted)}
           className="flex-shrink-0 p-1 rounded transition-colors hover:bg-white/50"
         >
           {musicMuted ? <VolumeX className="w-4 h-4 text-amber-600" /> : <MusicIcon className="w-4 h-4 text-amber-600" />}
         </button>
-        <span className="text-xs font-semibold text-gray-700 w-12">Music</span>
+        <span className="text-xs font-semibold text-gray-700 w-14">Music</span>
         <input
           type="range"
           min="0"
@@ -84,7 +84,7 @@ export function VolumeControls({
         >
           {ambienceMuted ? <VolumeX className="w-4 h-4 text-orange-600" /> : <Wind className="w-4 h-4 text-orange-600" />}
         </button>
-        <span className="text-xs font-semibold text-gray-700 w-12">Ambient</span>
+        <span className="text-xs font-semibold text-gray-700 w-14">Ambient</span>
         <input
           type="range"
           min="0"
