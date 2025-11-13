@@ -98,8 +98,24 @@ export function SourcePanel({
         </div>
       </div>
 
+      {/* Volume Controls */}
+      <div className="mt-6">
+        <VolumeControls
+          masterVolume={masterVolume}
+          musicVolume={musicVolume}
+          ambienceVolume={ambienceVolume}
+          musicMuted={musicMuted}
+          ambienceMuted={ambienceMuted}
+          onMasterVolumeChange={onMasterVolumeChange}
+          onMusicVolumeChange={onMusicVolumeChange}
+          onAmbienceVolumeChange={onAmbienceVolumeChange}
+          onMusicMutedChange={onMusicMutedChange}
+          onAmbienceMutedChange={onAmbienceMutedChange}
+        />
+      </div>
+
       {/* Tutorial Section with Credits Overlay */}
-      <div className="mt-6 relative">
+      <div className="mt-4 relative">
         <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl border-2 border-yellow-300 shadow-md p-4">
           <h3 className="text-gray-800 text-sm mb-2">How to Play</h3>
           <ul className="text-gray-600 text-xs space-y-1">
@@ -130,22 +146,6 @@ export function SourcePanel({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Volume Controls */}
-      <div className="mt-4">
-        <VolumeControls
-          masterVolume={masterVolume}
-          musicVolume={musicVolume}
-          ambienceVolume={ambienceVolume}
-          musicMuted={musicMuted}
-          ambienceMuted={ambienceMuted}
-          onMasterVolumeChange={onMasterVolumeChange}
-          onMusicVolumeChange={onMusicVolumeChange}
-          onAmbienceVolumeChange={onAmbienceVolumeChange}
-          onMusicMutedChange={onMusicMutedChange}
-          onAmbienceMutedChange={onAmbienceMutedChange}
-        />
       </div>
 
       {/* Credits Button */}

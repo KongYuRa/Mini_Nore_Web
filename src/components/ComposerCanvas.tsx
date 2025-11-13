@@ -118,13 +118,14 @@ export function ComposerCanvas({
                     font-bold text-sm transition-all
                     border-r border-yellow-200 last:border-r-0
                     ${isActive
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-inner'
+                      ? 'bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-inner'
                       : isEmpty
                       ? 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                       : 'bg-white text-gray-700 hover:bg-yellow-50'
                     }
                     ${isPlaying && isActive ? 'animate-pulse' : ''}
                   `}
+                  style={isActive ? { textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' } : undefined}
                 >
                   {index + 1}
                 </button>
@@ -200,7 +201,11 @@ export function ComposerCanvas({
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <div className="text-center text-white drop-shadow-lg">
               <p className="text-xl font-bold">Drag and drop sources here!</p>
-              <p className="text-sm mt-2">Create your magical soundscape</p>
+              <div className="text-sm mt-3 space-y-1">
+                <p><span className="font-semibold">Space:</span> Play/Pause</p>
+                <p><span className="font-semibold">Ctrl+Z:</span> Undo</p>
+                <p><span className="font-semibold">Ctrl+Shift+Z:</span> Redo</p>
+              </div>
             </div>
           </div>
         )}
