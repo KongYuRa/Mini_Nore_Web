@@ -3,7 +3,7 @@ import { SourceItem } from './SourceItem';
 import { PackSelector } from './PackSelector';
 import { VolumeControls } from './VolumeControls';
 import { getPackSources } from '../data/sources';
-import { Music, Wind, Info } from 'lucide-react';
+import { Music, Wind, Info, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 interface SourcePanelProps {
@@ -20,6 +20,7 @@ interface SourcePanelProps {
   onAmbienceVolumeChange: (volume: number) => void;
   onMusicMutedChange: (muted: boolean) => void;
   onAmbienceMutedChange: (muted: boolean) => void;
+  onGenerateAI: () => void;
 }
 
 export function SourcePanel({
@@ -36,8 +37,10 @@ export function SourcePanel({
   onAmbienceVolumeChange,
   onMusicMutedChange,
   onAmbienceMutedChange,
+  onGenerateAI,
 }: SourcePanelProps) {
   const [showCredits, setShowCredits] = useState(false);
+  const [showAITooltip, setShowAITooltip] = useState(false);
   const allSources = getPackSources(selectedPack);
   const musicSources = allSources.filter(s => s.type === 'music');
   const ambienceSources = allSources.filter(s => s.type === 'ambience');
@@ -135,8 +138,28 @@ export function SourcePanel({
         )}
       </div>
 
-      {/* Credits Button */}
-      <div className="mt-4 flex justify-center">
+      {/* Credits and AI Buttons */}
+      <div className="mt-4 flex justify-center gap-3 relative">
+        {/* AI Generate Button */}
+        <div className="relative">
+          <button
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 via-pink-400 to-purple-500 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
+            onClick={onGenerateAI}
+            onMouseEnter={() => setShowAITooltip(true)}
+            onMouseLeave={() => setShowAITooltip(false)}
+          >
+            <Sparkles className="w-5 h-5 text-white" />
+          </button>
+
+          {/* AI Tooltip */}
+          {showAITooltip && (
+            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg border-2 border-purple-300 shadow-xl p-2 z-20 whitespace-nowrap">
+              <p className="text-gray-800 font-semibold text-xs">Generate with AI?</p>
+            </div>
+          )}
+        </div>
+
+        {/* Credits Button */}
         <button
           className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
           onMouseEnter={() => setShowCredits(true)}

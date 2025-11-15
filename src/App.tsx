@@ -1,14 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { SourcePanel } from './components/SourcePanel';
 import { ComposerCanvas } from './components/ComposerCanvas';
-import { AIRecommendations } from './components/AIRecommendations';
 import { useAudioManager } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
 import { getPackSources } from './data/sources';
 import { CompositionResponse, CompositionData, apiService } from './services/api';
-import { Sparkles } from 'lucide-react';
-import { Button } from './components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
 
@@ -63,7 +59,6 @@ export default function App() {
   const [currentSlot, setCurrentSlot] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayingAll, setIsPlayingAll] = useState(false);
-  const [showAIRecommendations, setShowAIRecommendations] = useState(false);
 
   const scenes = allPackScenes[selectedPack];
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -253,13 +248,23 @@ export default function App() {
   };
 
 
-  // AI 추천 composition 로드
-  const handleLoadAIComposition = (composition: CompositionResponse) => {
-    setAllPackScenes({
-      ...allPackScenes,
-      [selectedPack]: composition.scenes,
-    });
-    setShowAIRecommendations(false);
+  // AI 생성 composition 로드
+  const handleGenerateAI = async () => {
+    try {
+      const composition = await apiService.generateComposition(selectedPack, 1.0);
+      setAllPackScenes({
+        ...allPackScenes,
+        [selectedPack]: composition.scenes,
+      });
+      toast.success('AI composition generated!', {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('AI generation failed:', error);
+      toast.error('Failed to generate AI composition', {
+        duration: 2000,
+      });
+    }
   };
 
   // 현재 composition을 API 형식으로 변환
@@ -291,6 +296,7 @@ export default function App() {
           onAmbienceVolumeChange={setAmbienceVolume}
           onMusicMutedChange={setMusicMuted}
           onAmbienceMutedChange={setAmbienceMuted}
+          onGenerateAI={handleGenerateAI}
         />
 
         {/* Composer Canvas - Right */}
@@ -310,34 +316,7 @@ export default function App() {
           onTogglePlay={() => setIsPlaying(!isPlaying)}
           onTogglePlayAll={handleTogglePlayAll}
         />
-
-        {/* AI 추천 버튼 (우측 하단) */}
-        <div className="absolute bottom-6 right-6 z-10">
-          <Button
-            onClick={() => setShowAIRecommendations(true)}
-            className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
-          >
-            <Sparkles className="w-4 h-4" />
-            AI 추천
-          </Button>
-        </div>
       </div>
-
-      {/* AI 추천 모달 */}
-      <Dialog open={showAIRecommendations} onOpenChange={setShowAIRecommendations}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-500" />
-              AI가 추천하는 {selectedPack.charAt(0).toUpperCase() + selectedPack.slice(1)} 작품
-            </DialogTitle>
-          </DialogHeader>
-          <AIRecommendations
-            pack={selectedPack}
-            onLoadComposition={handleLoadAIComposition}
-          />
-        </DialogContent>
-      </Dialog>
 
       {/* Toast 알림 */}
       <Toaster />
