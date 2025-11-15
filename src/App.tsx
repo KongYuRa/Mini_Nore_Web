@@ -67,7 +67,6 @@ export default function App() {
 
   const scenes = allPackScenes[selectedPack];
   const canvasRef = useRef<HTMLDivElement>(null);
-  const touchDragSourceRef = useRef<Source | null>(null);
   const playAllIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Volume controls
@@ -253,33 +252,6 @@ export default function App() {
     }
   };
 
-  // Touch drag handlers for SourceItem
-  const handleSourceTouchDragStart = (source: Source) => {
-    touchDragSourceRef.current = source;
-  };
-
-  const handleSourceTouchDragEnd = (x: number, y: number) => {
-    if (!canvasRef.current || !touchDragSourceRef.current) {
-      touchDragSourceRef.current = null;
-      return;
-    }
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const relativeX = x - rect.left;
-    const relativeY = y - rect.top;
-
-    // Check if drop is within canvas bounds
-    if (
-      relativeX >= 0 &&
-      relativeY >= 0 &&
-      relativeX <= rect.width &&
-      relativeY <= rect.height
-    ) {
-      handlePlaceSource(touchDragSourceRef.current, relativeX, relativeY);
-    }
-
-    touchDragSourceRef.current = null;
-  };
 
   // AI 추천 composition 로드
   const handleLoadAIComposition = (composition: CompositionResponse) => {
@@ -319,8 +291,6 @@ export default function App() {
           onAmbienceVolumeChange={setAmbienceVolume}
           onMusicMutedChange={setMusicMuted}
           onAmbienceMutedChange={setAmbienceMuted}
-          onTouchDragStart={handleSourceTouchDragStart}
-          onTouchDragEnd={handleSourceTouchDragEnd}
         />
 
         {/* Composer Canvas - Right */}
