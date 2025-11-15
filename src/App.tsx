@@ -328,8 +328,8 @@ export default function App() {
           onTogglePlayAll={handleTogglePlayAll}
         />
 
-        {/* AI 추천 & 저장 버튼 (우측 상단) */}
-        <div className="absolute top-4 right-4 flex gap-2 z-10">
+        {/* AI 추천 & 저장 버튼 (우측 하단) */}
+        <div className="absolute bottom-6 right-6 flex gap-2 z-10">
           <SaveCompositionButton
             composition={getCurrentComposition()}
             disabled={currentScene.placedSources.length === 0}
