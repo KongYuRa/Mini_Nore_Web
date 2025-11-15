@@ -9,7 +9,8 @@ import { CompositionResponse, CompositionData, apiService } from './services/api
 import { Sparkles } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
-import { Toaster, toast } from './components/ui/sonner';
+import { Toaster } from './components/ui/sonner';
+import { toast } from 'sonner';
 
 export interface Source {
   id: string;
