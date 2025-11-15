@@ -143,18 +143,18 @@ export function SourcePanel({
         {/* AI Generate Button */}
         <div className="relative">
           <button
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 via-pink-400 to-purple-500 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
             onClick={onGenerateAI}
             onMouseEnter={() => setShowAITooltip(true)}
             onMouseLeave={() => setShowAITooltip(false)}
           >
-            <Sparkles className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5 text-yellow-700" />
           </button>
 
           {/* AI Tooltip */}
           {showAITooltip && (
-            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg border-2 border-purple-300 shadow-xl p-2 z-20 whitespace-nowrap">
-              <p className="text-gray-800 font-semibold text-xs">Generate with AI?</p>
+            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white rounded-md shadow-lg px-2 py-1 z-20 border border-gray-200">
+              <p className="text-gray-700 text-xs whitespace-nowrap">Generate with AI?</p>
             </div>
           )}
         </div>
