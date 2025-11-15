@@ -1,9 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
 import { Play, Pause, PlayCircle, PauseCircle } from 'lucide-react';
-import { triggerHapticFeedback } from '../hooks/useDragAndDrop';
 
 interface ComposerCanvasProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -42,8 +41,6 @@ export function ComposerCanvas({
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const sources = getPackSources(selectedPack);
   const hasPlacedSources = placedSources.length > 0;
-  const touchDragSourceRef = useRef<Source | null>(null);
-  const touchDragPlacedIdRef = useRef<string | null>(null);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -96,71 +93,6 @@ export function ComposerCanvas({
       }
     }
     setDraggingId(null);
-  };
-
-  // Touch drag handlers for SourceItem
-  const handleSourceTouchDragStart = (source: Source) => {
-    touchDragSourceRef.current = source;
-    setIsDraggingOver(true);
-  };
-
-  const handleSourceTouchDragEnd = (x: number, y: number) => {
-    if (!canvasRef.current || !touchDragSourceRef.current) {
-      setIsDraggingOver(false);
-      touchDragSourceRef.current = null;
-      return;
-    }
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const relativeX = x - rect.left;
-    const relativeY = y - rect.top;
-
-    // Check if drop is within canvas bounds
-    if (
-      relativeX >= 0 &&
-      relativeY >= 0 &&
-      relativeX <= rect.width &&
-      relativeY <= rect.height
-    ) {
-      onPlaceSource(touchDragSourceRef.current, relativeX, relativeY);
-      triggerHapticFeedback('medium');
-    }
-
-    setIsDraggingOver(false);
-    touchDragSourceRef.current = null;
-  };
-
-  // Touch drag handlers for PlacedSource
-  const handlePlacedTouchMove = (id: string) => (x: number, y: number) => {
-    touchDragPlacedIdRef.current = id;
-    setIsDraggingOver(true);
-  };
-
-  const handlePlacedTouchMoveEnd = (id: string) => (x: number, y: number) => {
-    if (!canvasRef.current) {
-      setIsDraggingOver(false);
-      touchDragPlacedIdRef.current = null;
-      return;
-    }
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const relativeX = x - rect.left;
-    const relativeY = y - rect.top;
-
-    // Check if drop is within canvas bounds
-    if (
-      relativeX >= 0 &&
-      relativeY >= 0 &&
-      relativeX <= rect.width &&
-      relativeY <= rect.height
-    ) {
-      onMoveSource(id, relativeX, relativeY);
-      triggerHapticFeedback('medium');
-    }
-
-    setIsDraggingOver(false);
-    setDraggingId(null);
-    touchDragPlacedIdRef.current = null;
   };
 
   const getPackBackgroundImage = () => {
@@ -306,8 +238,6 @@ export function ComposerCanvas({
               onToggleMute={() => onToggleMute(placed.id)}
               onDragStart={() => handlePlacedDragStart(placed.id)}
               onDragEnd={(e) => handlePlacedDragEnd(e, placed.id)}
-              onTouchMove={handlePlacedTouchMove(placed.id)}
-              onTouchMoveEnd={handlePlacedTouchMoveEnd(placed.id)}
             />
           );
         })}

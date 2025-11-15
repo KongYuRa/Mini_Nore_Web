@@ -20,8 +20,6 @@ interface SourcePanelProps {
   onAmbienceVolumeChange: (volume: number) => void;
   onMusicMutedChange: (muted: boolean) => void;
   onAmbienceMutedChange: (muted: boolean) => void;
-  onTouchDragStart?: (source: Source) => void;
-  onTouchDragEnd?: (x: number, y: number) => void;
 }
 
 export function SourcePanel({
@@ -38,8 +36,6 @@ export function SourcePanel({
   onAmbienceVolumeChange,
   onMusicMutedChange,
   onAmbienceMutedChange,
-  onTouchDragStart,
-  onTouchDragEnd,
 }: SourcePanelProps) {
   const [showCredits, setShowCredits] = useState(false);
   const allSources = getPackSources(selectedPack);
@@ -74,8 +70,6 @@ export function SourcePanel({
                   key={source.id}
                   source={source}
                   isPlaced={isPlaced}
-                  onTouchDragStart={onTouchDragStart}
-                  onTouchDragEnd={onTouchDragEnd}
                 />
               );
             })}
@@ -97,8 +91,6 @@ export function SourcePanel({
                   key={source.id}
                   source={source}
                   isPlaced={isPlaced}
-                  onTouchDragStart={onTouchDragStart}
-                  onTouchDragEnd={onTouchDragEnd}
                 />
               );
             })}
