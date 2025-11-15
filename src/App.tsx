@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { SourcePanel } from './components/SourcePanel';
 import { ComposerCanvas } from './components/ComposerCanvas';
 import { AIRecommendations } from './components/AIRecommendations';
-import { SaveCompositionButton } from './components/SaveCompositionButton';
 import { useAudioManager } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
 import { getPackSources } from './data/sources';
-import { CompositionResponse, CompositionData } from './services/api';
+import { CompositionResponse, CompositionData, apiService } from './services/api';
 import { Sparkles } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
 import { Toaster } from './components/ui/sonner';
+import { toast } from 'sonner';
 
 export interface Source {
   id: string;
@@ -227,7 +227,7 @@ export default function App() {
     });
   };
 
-  const handleTogglePlayAll = () => {
+  const handleTogglePlayAll = async () => {
     if (isPlayingAll) {
       // Stop full playback
       setIsPlayingAll(false);
@@ -237,6 +237,19 @@ export default function App() {
       setCurrentSlot(0);
       setIsPlayingAll(true);
       setIsPlaying(true);
+
+      // 자동 저장 (전체 재생 시작할 때)
+      if (currentScene.placedSources.length > 0) {
+        try {
+          await apiService.saveComposition(getCurrentComposition());
+          toast.success('작품이 자동 저장되었습니다', {
+            duration: 2000,
+          });
+        } catch (error) {
+          // 저장 실패해도 재생은 계속
+          console.log('Auto-save failed (server may be offline):', error);
+        }
+      }
     }
   };
 
@@ -328,15 +341,11 @@ export default function App() {
           onTogglePlayAll={handleTogglePlayAll}
         />
 
-        {/* AI 추천 & 저장 버튼 (우측 상단) */}
-        <div className="absolute top-4 right-4 flex gap-2 z-10">
-          <SaveCompositionButton
-            composition={getCurrentComposition()}
-            disabled={currentScene.placedSources.length === 0}
-          />
+        {/* AI 추천 버튼 (우측 하단) */}
+        <div className="absolute bottom-6 right-6 z-10">
           <Button
             onClick={() => setShowAIRecommendations(true)}
-            className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
           >
             <Sparkles className="w-4 h-4" />
             AI 추천
