@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # MongoDB 데이터베이스
+  mongodb:
+    image: mongo:7.0
+    container_name: mini_nore_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: mini_nore_ml
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mini_nore_network
+
+  # FastAPI 백엔드
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mini_nore_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - DATABASE_NAME=mini_nore_ml
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend:/app
+      - ./backend/models/checkpoints:/app/models/checkpoints
+    networks:
+      - mini_nore_network
+
+  # Frontend (개발 서버)
+  frontend:
+    image: node:20-alpine
+    container_name: mini_nore_frontend
+    working_dir: /app
+    command: npm run dev -- --host
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - mini_nore_network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  mini_nore_network:
+    driver: bridge

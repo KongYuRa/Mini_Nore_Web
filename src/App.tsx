@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { SourcePanel } from './components/SourcePanel';
 import { ComposerCanvas } from './components/ComposerCanvas';
+import { AIRecommendations } from './components/AIRecommendations';
+import { SaveCompositionButton } from './components/SaveCompositionButton';
 import { useAudioManager } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
 import { getPackSources } from './data/sources';
+import { CompositionResponse, CompositionData } from './services/api';
+import { Sparkles } from 'lucide-react';
+import { Button } from './components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
+import { Toaster } from './components/ui/sonner';
 
 export interface Source {
   id: string;
@@ -56,6 +63,7 @@ export default function App() {
   const [currentSlot, setCurrentSlot] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayingAll, setIsPlayingAll] = useState(false);
+  const [showAIRecommendations, setShowAIRecommendations] = useState(false);
 
   const scenes = allPackScenes[selectedPack];
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -260,44 +268,100 @@ export default function App() {
     touchDragSourceRef.current = null;
   };
 
-  return (
-    <div className="h-screen w-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 overflow-hidden flex select-none">
-      {/* Source Panel - Left */}
-      <SourcePanel
-        selectedPack={selectedPack}
-        placedSources={currentScene.placedSources}
-        onSelectPack={setSelectedPack}
-        masterVolume={masterVolume}
-        musicVolume={musicVolume}
-        ambienceVolume={ambienceVolume}
-        musicMuted={musicMuted}
-        ambienceMuted={ambienceMuted}
-        onMasterVolumeChange={setMasterVolume}
-        onMusicVolumeChange={setMusicVolume}
-        onAmbienceVolumeChange={setAmbienceVolume}
-        onMusicMutedChange={setMusicMuted}
-        onAmbienceMutedChange={setAmbienceMuted}
-        onTouchDragStart={handleSourceTouchDragStart}
-        onTouchDragEnd={handleSourceTouchDragEnd}
-      />
+  // AI 추천 composition 로드
+  const handleLoadAIComposition = (composition: CompositionResponse) => {
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: composition.scenes,
+    });
+    setShowAIRecommendations(false);
+  };
 
-      {/* Composer Canvas - Right */}
-      <ComposerCanvas
-        canvasRef={canvasRef}
-        selectedPack={selectedPack}
-        placedSources={currentScene.placedSources}
-        isPlaying={isPlaying}
-        isPlayingAll={isPlayingAll}
-        scenes={scenes}
-        currentSlot={currentSlot}
-        onSelectSlot={setCurrentSlot}
-        onPlaceSource={handlePlaceSource}
-        onRemoveSource={handleRemoveSource}
-        onMoveSource={handleMoveSource}
-        onToggleMute={handleToggleMute}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onTogglePlayAll={handleTogglePlayAll}
-      />
-    </div>
+  // 현재 composition을 API 형식으로 변환
+  const getCurrentComposition = (): CompositionData => {
+    return {
+      pack: selectedPack,
+      scenes: scenes,
+      masterVolume,
+      musicVolume,
+      ambienceVolume,
+    };
+  };
+
+  return (
+    <>
+      <div className="h-screen w-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 overflow-hidden flex select-none">
+        {/* Source Panel - Left */}
+        <SourcePanel
+          selectedPack={selectedPack}
+          placedSources={currentScene.placedSources}
+          onSelectPack={setSelectedPack}
+          masterVolume={masterVolume}
+          musicVolume={musicVolume}
+          ambienceVolume={ambienceVolume}
+          musicMuted={musicMuted}
+          ambienceMuted={ambienceMuted}
+          onMasterVolumeChange={setMasterVolume}
+          onMusicVolumeChange={setMusicVolume}
+          onAmbienceVolumeChange={setAmbienceVolume}
+          onMusicMutedChange={setMusicMuted}
+          onAmbienceMutedChange={setAmbienceMuted}
+          onTouchDragStart={handleSourceTouchDragStart}
+          onTouchDragEnd={handleSourceTouchDragEnd}
+        />
+
+        {/* Composer Canvas - Right */}
+        <ComposerCanvas
+          canvasRef={canvasRef}
+          selectedPack={selectedPack}
+          placedSources={currentScene.placedSources}
+          isPlaying={isPlaying}
+          isPlayingAll={isPlayingAll}
+          scenes={scenes}
+          currentSlot={currentSlot}
+          onSelectSlot={setCurrentSlot}
+          onPlaceSource={handlePlaceSource}
+          onRemoveSource={handleRemoveSource}
+          onMoveSource={handleMoveSource}
+          onToggleMute={handleToggleMute}
+          onTogglePlay={() => setIsPlaying(!isPlaying)}
+          onTogglePlayAll={handleTogglePlayAll}
+        />
+
+        {/* AI 추천 & 저장 버튼 (우측 상단) */}
+        <div className="absolute top-4 right-4 flex gap-2 z-10">
+          <SaveCompositionButton
+            composition={getCurrentComposition()}
+            disabled={currentScene.placedSources.length === 0}
+          />
+          <Button
+            onClick={() => setShowAIRecommendations(true)}
+            className="gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+          >
+            <Sparkles className="w-4 h-4" />
+            AI 추천
+          </Button>
+        </div>
+      </div>
+
+      {/* AI 추천 모달 */}
+      <Dialog open={showAIRecommendations} onOpenChange={setShowAIRecommendations}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              AI가 추천하는 {selectedPack.charAt(0).toUpperCase() + selectedPack.slice(1)} 작품
+            </DialogTitle>
+          </DialogHeader>
+          <AIRecommendations
+            pack={selectedPack}
+            onLoadComposition={handleLoadAIComposition}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Toast 알림 */}
+      <Toaster />
+    </>
   );
 }
