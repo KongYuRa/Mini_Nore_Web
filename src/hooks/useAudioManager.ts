@@ -155,6 +155,18 @@ export function useAudioManager({
     if (!audioContextRef.current || !ambienceGainRef.current) return;
     if (selectedPack !== 'adventure') return; // Only for Adventure Pack
     if (ambienceMuted) return; // Don't play if muted
+    if (!isPlaying) {
+      // Stop main ambience when not playing
+      if (mainAmbienceNodeRef.current) {
+        try {
+          mainAmbienceNodeRef.current.stop();
+        } catch (e) {
+          // Already stopped
+        }
+        mainAmbienceNodeRef.current = null;
+      }
+      return;
+    }
 
     const playMainAmbience = async () => {
       // Resume audio context if needed
@@ -200,7 +212,7 @@ export function useAudioManager({
         mainAmbienceNodeRef.current = null;
       }
     };
-  }, [selectedPack, ambienceMuted]);
+  }, [selectedPack, ambienceMuted, isPlaying]);
 
   // Create 3D panner node for ambience (앰비언스만 3D 적용)
   const create3DPanner = (sourceId: string, x: number, y: number): PannerNode | null => {
@@ -211,9 +223,9 @@ export function useAudioManager({
     // 3D 오디오 설정
     panner.panningModel = 'HRTF'; // 인간 청각 모델 (가장 정확한 3D 사운드)
     panner.distanceModel = 'inverse'; // 거리 감쇠 모델
-    panner.refDistance = 1; // 거리 감쇠 시작 거리
-    panner.maxDistance = 20; // 최대 거리
-    panner.rolloffFactor = 1; // 거리 감쇠율
+    panner.refDistance = 3; // 거리 감쇠 시작 거리 (1 -> 3, 3배)
+    panner.maxDistance = 60; // 최대 거리 (20 -> 60, 3배)
+    panner.rolloffFactor = 0.5; // 거리 감쇠율 (1 -> 0.5, 더 천천히 감쇠)
     panner.coneInnerAngle = 360; // 전방향 소리
     panner.coneOuterAngle = 360;
     panner.coneOuterGain = 0.5;

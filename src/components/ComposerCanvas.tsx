@@ -292,7 +292,7 @@ export function ComposerCanvas({
             {/* 레이블 */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap">
               <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg font-semibold">
-                🎧 Listener
+                Listener
               </div>
             </div>
           </div>

@@ -74,9 +74,9 @@ export default function App() {
 
   // Listener position (3D audio)
   const [listenerPosition, setListenerPosition] = useState<ListenerPosition>({
-    x: 0,      // 중앙
+    x: 0,      // 중앙 (좌우)
     y: 1.6,    // 귀 높이
-    z: 0,      // 중앙
+    z: -5,     // 중앙 (앞뒤)
   });
 
   // Canvas 크기 (3D 좌표 변환용)
