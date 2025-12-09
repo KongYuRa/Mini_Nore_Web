@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
@@ -116,13 +116,20 @@ export function ComposerCanvas({
     setDraggingId(null);
   };
 
-  // 리스너 드래그 핸들러
+  // 리스너 드래그 핸들러 (throttled for performance)
+  const lastDragUpdate = useRef<number>(0);
+
   const handleListenerDragStart = () => {
     setIsDraggingListener(true);
   };
 
   const handleListenerDrag = (e: React.DragEvent) => {
     if (!canvasRef.current || e.clientX === 0 || e.clientY === 0) return;
+
+    // Throttle updates to ~60fps (16ms)
+    const now = Date.now();
+    if (now - lastDragUpdate.current < 16) return;
+    lastDragUpdate.current = now;
 
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;

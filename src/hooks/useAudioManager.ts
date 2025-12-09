@@ -191,6 +191,7 @@ export function useAudioManager({
       if (mainAmbienceNodeRef.current) {
         try {
           mainAmbienceNodeRef.current.stop();
+          mainAmbienceNodeRef.current.disconnect();
         } catch (e) {
           // Already stopped
         }
@@ -280,16 +281,71 @@ export function useAudioManager({
 
   // Stop all audio sources
   const stopAllAudio = () => {
-    sourceNodesRef.current.forEach(node => {
+    sourceNodesRef.current.forEach((node, id) => {
       try {
         node.stop();
+        node.disconnect(); // Prevent memory leak
       } catch (e) {
         // Already stopped
       }
     });
+
+    // Disconnect gain nodes
+    gainNodesRef.current.forEach(node => {
+      try {
+        node.disconnect();
+      } catch (e) {
+        // Already disconnected
+      }
+    });
+
+    // Disconnect panner nodes
+    pannerNodesRef.current.forEach(node => {
+      try {
+        node.disconnect();
+      } catch (e) {
+        // Already disconnected
+      }
+    });
+
     sourceNodesRef.current.clear();
     gainNodesRef.current.clear();
     pannerNodesRef.current.clear();
+  };
+
+  // Stop specific audio source
+  const stopAudioSource = (sourceId: string) => {
+    const sourceNode = sourceNodesRef.current.get(sourceId);
+    const gainNode = gainNodesRef.current.get(sourceId);
+    const pannerNode = pannerNodesRef.current.get(sourceId);
+
+    if (sourceNode) {
+      try {
+        sourceNode.stop();
+        sourceNode.disconnect();
+      } catch (e) {
+        // Already stopped
+      }
+      sourceNodesRef.current.delete(sourceId);
+    }
+
+    if (gainNode) {
+      try {
+        gainNode.disconnect();
+      } catch (e) {
+        // Already disconnected
+      }
+      gainNodesRef.current.delete(sourceId);
+    }
+
+    if (pannerNode) {
+      try {
+        pannerNode.disconnect();
+      } catch (e) {
+        // Already disconnected
+      }
+      pannerNodesRef.current.delete(sourceId);
+    }
   };
 
   // Handle playback - Pack separation
@@ -413,12 +469,101 @@ export function useAudioManager({
     playAudio();
   }, [isPlaying, currentSlot, selectedPack]);
 
-  // Update individual source volume/mute state
+  // Update individual source volume/mute state and cleanup removed sources
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || !audioContextRef.current) return;
 
     const currentPackScenes = scenes[selectedPack];
     const currentScene = currentPackScenes[currentSlot];
+
+    // Get pack prefix
+    const packPrefix = selectedPack === 'adventure' ? 'adv-'
+                     : selectedPack === 'combat' ? 'cmb-'
+                     : 'shl-';
+
+    // Get current placed source IDs
+    const currentSourceIds = new Set(currentScene.placedSources.map(s => s.id));
+
+    // Stop audio for removed sources
+    sourceNodesRef.current.forEach((_, id) => {
+      if (!currentSourceIds.has(id)) {
+        stopAudioSource(id);
+        console.log(`Stopped removed source: ${id}`);
+      }
+    });
+
+    // Start audio for newly added sources
+    const playNewSources = async () => {
+      for (const placed of currentScene.placedSources) {
+        // Skip if already playing
+        if (sourceNodesRef.current.has(placed.id)) continue;
+
+        // Skip if not from current pack
+        if (!placed.sourceId.startsWith(packPrefix)) continue;
+
+        // Determine source type
+        const isMusic = placed.sourceId.includes('music') ||
+                       placed.sourceId.includes('hero') ||
+                       placed.sourceId.includes('drums') ||
+                       placed.sourceId.includes('melody') ||
+                       placed.sourceId.includes('rhythm');
+
+        // Map sourceId to file name
+        let audioUrl = '';
+        if (selectedPack === 'adventure' && !isMusic) {
+          const ambienceMap: Record<string, string> = {
+            'adv-footstep': 'mininore_AdventurePack_02footstep.wav',
+            'adv-birds': 'mininore_AdventurePack_03Birds.wav',
+            'adv-horse': 'mininore_AdventurePack_04Horse.wav',
+            'adv-walla': 'mininore_AdventurePack_05Walla.wav',
+            'adv-river': 'mininore_AdventurePack_06River.wav',
+            'adv-buggy': 'mininore_AdventurePack_07Buggy.wav',
+            'adv-sheep': 'mininore_AdventurePack_08Sheep.wav',
+            'adv-wolf': 'mininore_AdventurePack_09Wolf.wav',
+            'adv-night': 'mininore_AdventurePack_10night.wav',
+            'adv-frog': 'mininore_AdventurePack_11frog.wav',
+          };
+
+          const fileName = ambienceMap[placed.sourceId];
+          if (fileName) {
+            audioUrl = `/ambient/01AdventurePack/${fileName}`;
+          }
+        }
+
+        if (!audioUrl) continue;
+
+        console.log(`Starting new source: ${placed.sourceId}`);
+
+        // Load and play
+        const buffer = await loadAudioFile(audioUrl);
+        if (!buffer || !audioContextRef.current) continue;
+
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+
+        const gainNode = audioContextRef.current.createGain();
+        gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
+
+        if (isMusic) {
+          source.connect(gainNode);
+          gainNode.connect(musicGainRef.current!);
+        } else {
+          const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
+          if (panner) {
+            source.connect(gainNode);
+            gainNode.connect(panner);
+            panner.connect(ambienceGainRef.current!);
+          }
+        }
+
+        source.start(0);
+        sourceNodesRef.current.set(placed.id, source);
+        gainNodesRef.current.set(placed.id, gainNode);
+      }
+    };
+
+    playNewSources();
 
     // Update gain nodes for volume/mute changes
     currentScene.placedSources.forEach(placed => {
