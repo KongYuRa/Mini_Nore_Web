@@ -21,6 +21,7 @@ interface ComposerCanvasProps {
   onRemoveSource: (id: string) => void;
   onMoveSource: (id: string, x: number, y: number) => void;
   onToggleMute: (id: string) => void;
+  onDepthChange: (id: string, depth: number) => void;
   onTogglePlay: () => void;
   onTogglePlayAll: () => void;
   onMoveListener: (x: number, y: number) => void;
@@ -42,6 +43,7 @@ export function ComposerCanvas({
   onRemoveSource,
   onMoveSource,
   onToggleMute,
+  onDepthChange,
   onTogglePlay,
   onTogglePlayAll,
   onMoveListener,
@@ -54,8 +56,8 @@ export function ComposerCanvas({
 
   // 3D 좌표 → 2D 캔버스 좌표 변환 (리스너 표시용)
   const listener3DTo2D = () => {
-    const x = ((listenerPosition.x + 5) / 10) * canvasWidth;
-    const y = ((-listenerPosition.z) / 10) * canvasHeight;
+    const x = ((5 - listenerPosition.x) / 10) * canvasWidth;
+    const y = (listenerPosition.z / 10) * canvasHeight;
     return { x, y };
   };
 
@@ -255,6 +257,7 @@ export function ComposerCanvas({
               isDragging={draggingId === placed.id}
               onRemove={() => onRemoveSource(placed.id)}
               onToggleMute={() => onToggleMute(placed.id)}
+              onDepthChange={(depth) => onDepthChange(placed.id, depth)}
               onDragStart={() => handlePlacedDragStart(placed.id)}
               onDragEnd={(e) => handlePlacedDragEnd(e, placed.id)}
             />
