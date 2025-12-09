@@ -47,6 +47,8 @@ export function useAudioManager({
   const pannerNodesRef = useRef<Map<string, PannerNode>>(new Map());
   const audioBuffersRef = useRef<Map<string, AudioBuffer>>(new Map());
   const mainAmbienceNodeRef = useRef<AudioBufferSourceNode | null>(null);
+  const preloadedRef = useRef<boolean>(false);
+  const currentSceneIdRef = useRef<string>('');  // Track current playing scene
 
   // 2D 캔버스 좌표 → 3D 오디오 공간 변환
   const canvasTo3D = (x: number, y: number, depth: number = 0): ListenerPosition => {
@@ -85,6 +87,31 @@ export function useAudioManager({
     }
   };
 
+  // Preload all audio files for instant playback
+  const preloadAllAudio = async () => {
+    if (!audioContextRef.current || preloadedRef.current) return;
+
+    console.log('Preloading all audio files...');
+
+    const allUrls = [
+      '/ambient/01AdventurePack/mininore_AdventurePack_01Mainambience.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_02footstep.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_03Birds.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_04Horse.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_05Walla.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_06River.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_07Buggy.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_08Sheep.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_09Wolf.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_10night.wav',
+      '/ambient/01AdventurePack/mininore_AdventurePack_11frog.wav',
+    ];
+
+    await Promise.all(allUrls.map(url => loadAudioFile(url)));
+    preloadedRef.current = true;
+    console.log('All audio files preloaded!');
+  };
+
   // Initialize audio context
   useEffect(() => {
     if (!audioContextRef.current) {
@@ -116,6 +143,9 @@ export function useAudioManager({
         listener.setPosition(0, 1.6, 5);
         listener.setOrientation(0, 0, -1, 0, 1, 0);
       }
+
+      // Preload all audio files for instant playback
+      preloadAllAudio();
     }
 
     return () => {
@@ -155,10 +185,9 @@ export function useAudioManager({
   // Main ambience background auto-play (Adventure Pack only)
   useEffect(() => {
     if (!audioContextRef.current || !ambienceGainRef.current) return;
-    if (selectedPack !== 'adventure') return; // Only for Adventure Pack
-    if (ambienceMuted) return; // Don't play if muted
-    if (!isPlaying) {
-      // Stop main ambience when not playing
+
+    // Stop main ambience if conditions are not met
+    if (selectedPack !== 'adventure' || ambienceMuted || !isPlaying) {
       if (mainAmbienceNodeRef.current) {
         try {
           mainAmbienceNodeRef.current.stop();
@@ -166,7 +195,13 @@ export function useAudioManager({
           // Already stopped
         }
         mainAmbienceNodeRef.current = null;
+        console.log('Main ambience stopped');
       }
+      return;
+    }
+
+    // Don't restart if already playing
+    if (mainAmbienceNodeRef.current) {
       return;
     }
 
@@ -181,15 +216,6 @@ export function useAudioManager({
 
       if (!buffer || !audioContextRef.current || !ambienceGainRef.current) return;
 
-      // Stop previous main ambience if playing
-      if (mainAmbienceNodeRef.current) {
-        try {
-          mainAmbienceNodeRef.current.stop();
-        } catch (e) {
-          // Already stopped
-        }
-      }
-
       // Create and play main ambience
       const source = audioContextRef.current.createBufferSource();
       source.buffer = buffer;
@@ -202,18 +228,6 @@ export function useAudioManager({
     };
 
     playMainAmbience();
-
-    // Cleanup on unmount or pack change
-    return () => {
-      if (mainAmbienceNodeRef.current) {
-        try {
-          mainAmbienceNodeRef.current.stop();
-        } catch (e) {
-          // Already stopped
-        }
-        mainAmbienceNodeRef.current = null;
-      }
-    };
   }, [selectedPack, ambienceMuted, isPlaying]);
 
   // Create 3D panner node for ambience (앰비언스만 3D 적용)
@@ -264,137 +278,161 @@ export function useAudioManager({
     }
   };
 
+  // Stop all audio sources
+  const stopAllAudio = () => {
+    sourceNodesRef.current.forEach(node => {
+      try {
+        node.stop();
+      } catch (e) {
+        // Already stopped
+      }
+    });
+    sourceNodesRef.current.clear();
+    gainNodesRef.current.clear();
+    pannerNodesRef.current.clear();
+  };
+
   // Handle playback - Pack separation
   useEffect(() => {
     if (!audioContextRef.current || !musicGainRef.current || !ambienceGainRef.current) return;
 
     const playAudio = async () => {
-      // Always stop all playing sources first (씬 전환 시에도 정리)
-      sourceNodesRef.current.forEach(node => {
-        try {
-          node.stop();
-        } catch (e) {
-          // Already stopped
-        }
-      });
-      sourceNodesRef.current.clear();
-      gainNodesRef.current.clear();
-      pannerNodesRef.current.clear();
+      const currentPackScenes = scenes[selectedPack];
+      const currentScene = currentPackScenes[currentSlot];
+      const sceneId = `${selectedPack}-${currentSlot}`;
 
-      if (isPlaying) {
-        // Resume audio context if suspended
-        if (audioContextRef.current!.state === 'suspended') {
-          await audioContextRef.current!.resume();
-        }
+      // If not playing, stop all audio
+      if (!isPlaying) {
+        stopAllAudio();
+        currentSceneIdRef.current = '';
+        return;
+      }
 
-        const currentPackScenes = scenes[selectedPack];
-        const currentScene = currentPackScenes[currentSlot];
+      // If same scene is already playing, don't restart
+      if (sceneId === currentSceneIdRef.current && sourceNodesRef.current.size > 0) {
+        return;
+      }
 
-        // Get pack prefix
-        const packPrefix = selectedPack === 'adventure' ? 'adv-'
-                         : selectedPack === 'combat' ? 'cmb-'
-                         : 'shl-';
+      // Scene changed or first play - stop and restart
+      stopAllAudio();
+      currentSceneIdRef.current = sceneId;
 
-        // Filter sources by current pack only
-        const packSources = currentScene.placedSources.filter(s =>
-          s.sourceId.startsWith(packPrefix)
-        );
+      // Resume audio context if suspended
+      if (audioContextRef.current!.state === 'suspended') {
+        await audioContextRef.current!.resume();
+      }
 
-        console.log('Playing scene:', currentSlot + 1);
-        console.log('Pack:', selectedPack);
-        console.log('Pack sources:', packSources.length);
+      // Get pack prefix
+      const packPrefix = selectedPack === 'adventure' ? 'adv-'
+                       : selectedPack === 'combat' ? 'cmb-'
+                       : 'shl-';
 
-        // Load and play each source
-        for (const placed of packSources) {
-          // Determine source type
-          const isMusic = placed.sourceId.includes('music') ||
-                         placed.sourceId.includes('hero') ||
-                         placed.sourceId.includes('drums') ||
-                         placed.sourceId.includes('melody') ||
-                         placed.sourceId.includes('rhythm');
+      // Filter sources by current pack only
+      const packSources = currentScene.placedSources.filter(s =>
+        s.sourceId.startsWith(packPrefix)
+      );
 
-          // Map sourceId to file name for AdventurePack ambience
-          let audioUrl = '';
-          if (selectedPack === 'adventure' && !isMusic) {
-            const ambienceMap: Record<string, string> = {
-              'adv-footstep': 'mininore_AdventurePack_02footstep.wav',
-              'adv-birds': 'mininore_AdventurePack_03Birds.wav',
-              'adv-horse': 'mininore_AdventurePack_04Horse.wav',
-              'adv-walla': 'mininore_AdventurePack_05Walla.wav',
-              'adv-river': 'mininore_AdventurePack_06River.wav',
-              'adv-buggy': 'mininore_AdventurePack_07Buggy.wav',
-              'adv-sheep': 'mininore_AdventurePack_08Sheep.wav',
-              'adv-wolf': 'mininore_AdventurePack_09Wolf.wav',
-              'adv-night': 'mininore_AdventurePack_10night.wav',
-              'adv-frog': 'mininore_AdventurePack_11frog.wav',
-            };
+      console.log('Playing scene:', currentSlot + 1);
+      console.log('Pack:', selectedPack);
+      console.log('Pack sources:', packSources.length);
 
-            const fileName = ambienceMap[placed.sourceId];
-            if (fileName) {
-              audioUrl = `/ambient/01AdventurePack/${fileName}`;
-            }
+      // Load and play each source
+      for (const placed of packSources) {
+        // Determine source type
+        const isMusic = placed.sourceId.includes('music') ||
+                       placed.sourceId.includes('hero') ||
+                       placed.sourceId.includes('drums') ||
+                       placed.sourceId.includes('melody') ||
+                       placed.sourceId.includes('rhythm');
+
+        // Map sourceId to file name for AdventurePack ambience
+        let audioUrl = '';
+        if (selectedPack === 'adventure' && !isMusic) {
+          const ambienceMap: Record<string, string> = {
+            'adv-footstep': 'mininore_AdventurePack_02footstep.wav',
+            'adv-birds': 'mininore_AdventurePack_03Birds.wav',
+            'adv-horse': 'mininore_AdventurePack_04Horse.wav',
+            'adv-walla': 'mininore_AdventurePack_05Walla.wav',
+            'adv-river': 'mininore_AdventurePack_06River.wav',
+            'adv-buggy': 'mininore_AdventurePack_07Buggy.wav',
+            'adv-sheep': 'mininore_AdventurePack_08Sheep.wav',
+            'adv-wolf': 'mininore_AdventurePack_09Wolf.wav',
+            'adv-night': 'mininore_AdventurePack_10night.wav',
+            'adv-frog': 'mininore_AdventurePack_11frog.wav',
+          };
+
+          const fileName = ambienceMap[placed.sourceId];
+          if (fileName) {
+            audioUrl = `/ambient/01AdventurePack/${fileName}`;
           }
+        }
 
-          // Skip if no audio file available (music not yet implemented)
-          if (!audioUrl) {
-            console.log(`  - ${placed.sourceId}: No audio file available yet`);
-            continue;
-          }
+        // Skip if no audio file available (music not yet implemented)
+        if (!audioUrl) {
+          console.log(`  - ${placed.sourceId}: No audio file available yet`);
+          continue;
+        }
 
-          console.log(`  - ${placed.sourceId} at (${placed.x}, ${placed.y}) [${isMusic ? 'MUSIC' : 'AMBIENCE (3D)'}]`);
+        console.log(`  - ${placed.sourceId} at (${placed.x}, ${placed.y}) [${isMusic ? 'MUSIC' : 'AMBIENCE (3D)'}]`);
 
-          // Load audio buffer
-          const buffer = await loadAudioFile(audioUrl);
-          if (!buffer || !audioContextRef.current) continue;
+        // Load audio buffer (should be instant from cache)
+        const buffer = await loadAudioFile(audioUrl);
+        if (!buffer || !audioContextRef.current) continue;
 
-          // Create source node
-          const source = audioContextRef.current.createBufferSource();
-          source.buffer = buffer;
-          source.loop = true; // Loop all ambience sounds
+        // Create source node
+        const source = audioContextRef.current.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true; // Loop all ambience sounds
 
-          // Create gain node for individual volume control
-          const gainNode = audioContextRef.current.createGain();
-          gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
+        // Create gain node for individual volume control
+        const gainNode = audioContextRef.current.createGain();
+        gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
 
-          // Connect audio graph
-          if (isMusic) {
-            // Music: Direct connection (no 3D)
+        // Connect audio graph
+        if (isMusic) {
+          // Music: Direct connection (no 3D)
+          source.connect(gainNode);
+          gainNode.connect(musicGainRef.current!);
+        } else {
+          // Ambience: 3D spatial audio (with depth)
+          const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
+          if (panner) {
             source.connect(gainNode);
-            gainNode.connect(musicGainRef.current!);
-          } else {
-            // Ambience: 3D spatial audio (with depth)
-            const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
-            if (panner) {
-              source.connect(gainNode);
-              gainNode.connect(panner);
-              panner.connect(ambienceGainRef.current!);
-            }
+            gainNode.connect(panner);
+            panner.connect(ambienceGainRef.current!);
           }
-
-          // Start playback
-          source.start(0);
-          sourceNodesRef.current.set(placed.id, source);
-          gainNodesRef.current.set(placed.id, gainNode);
         }
+
+        // Start playback immediately
+        source.start(0);
+        sourceNodesRef.current.set(placed.id, source);
+        gainNodesRef.current.set(placed.id, gainNode);
       }
     };
 
     playAudio();
-  }, [isPlaying, currentSlot, selectedPack, scenes]);
+  }, [isPlaying, currentSlot, selectedPack]);
 
-  // Update 3D positions when sources move or depth changes
+  // Update individual source volume/mute state
   useEffect(() => {
     if (!isPlaying) return;
 
     const currentPackScenes = scenes[selectedPack];
     const currentScene = currentPackScenes[currentSlot];
 
+    // Update gain nodes for volume/mute changes
     currentScene.placedSources.forEach(placed => {
+      const gainNode = gainNodesRef.current.get(placed.id);
+      if (gainNode) {
+        gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
+      }
+
+      // Update 3D position if panner exists
       if (pannerNodesRef.current.has(placed.id)) {
         update3DPosition(placed.id, placed.x, placed.y, placed.depth || 0);
       }
     });
-  }, [isPlaying, currentSlot, selectedPack, scenes]);
+  }, [scenes, isPlaying, currentSlot, selectedPack]);
 
   return {
     audioContext: audioContextRef.current,
