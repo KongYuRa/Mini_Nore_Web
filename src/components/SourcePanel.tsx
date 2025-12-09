@@ -3,8 +3,7 @@ import { SourceItem } from './SourceItem';
 import { PackSelector } from './PackSelector';
 import { VolumeControls } from './VolumeControls';
 import { getPackSources } from '../data/sources';
-import { AIComposer } from '../services/aiComposer';
-import { Music, Wind, Info, Sparkles, Brain, Layers, Target } from 'lucide-react';
+import { Music, Wind, Info, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 interface SourcePanelProps {
@@ -48,9 +47,6 @@ export function SourcePanel({
 
   // 이미 배치된 소스 ID 목록
   const placedSourceIds = new Set(placedSources.map(p => p.sourceId));
-
-  // AI 감정 프로파일 가져오기
-  const emotionProfile = AIComposer.getEmotionProfile(selectedPack);
 
   return (
     <div className="w-auto bg-white/60 backdrop-blur-sm border-r-2 border-yellow-200 p-4 overflow-y-auto shadow-lg flex flex-col">
@@ -142,86 +138,47 @@ export function SourcePanel({
         )}
       </div>
 
-      {/* AI Profile Info Card */}
-      <div className="mt-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200 shadow-md">
-        <div className="flex items-center gap-2 mb-3">
-          <Brain className="w-5 h-5 text-purple-600" />
-          <h3 className="text-sm font-bold text-purple-900">{emotionProfile.name}</h3>
-        </div>
-
-        <p className="text-xs text-purple-700 mb-3">{emotionProfile.description}</p>
-
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="bg-white/60 rounded-lg p-2">
-            <div className="flex items-center gap-1 mb-1">
-              <Music className="w-3 h-3 text-amber-600" />
-              <span className="text-xs text-gray-700 font-medium">Music</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div
-                className="bg-gradient-to-r from-amber-400 to-yellow-500 h-1.5 rounded-full"
-                style={{ width: `${emotionProfile.musicDensity * 100}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-white/60 rounded-lg p-2">
-            <div className="flex items-center gap-1 mb-1">
-              <Wind className="w-3 h-3 text-orange-600" />
-              <span className="text-xs text-gray-700 font-medium">Ambience</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div
-                className="bg-gradient-to-r from-orange-400 to-amber-500 h-1.5 rounded-full"
-                style={{ width: `${emotionProfile.ambienceDensity * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="flex items-center gap-1">
-            <Target className="w-3 h-3 text-purple-500" />
-            <span className="text-gray-700">{emotionProfile.spatialPattern}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Layers className="w-3 h-3 text-purple-500" />
-            <span className="text-gray-700">{emotionProfile.layering}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Credits and AI Buttons */}
-      <div className="mt-4 flex justify-center gap-3 relative">
+      {/* AI and Credits Buttons */}
+      <div className="mt-4 flex justify-center gap-4">
         {/* AI Generate Button */}
         <div className="relative">
           <button
-            className="flex-1 px-6 py-3 rounded-2xl bg-gradient-to-br from-purple-400 to-blue-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2 border-2 border-white"
+            className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-400 via-violet-500 to-indigo-500 shadow-xl hover:shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group relative overflow-hidden"
             onClick={onGenerateAI}
             onMouseEnter={() => setShowAITooltip(true)}
             onMouseLeave={() => setShowAITooltip(false)}
+            title="Generate AI Composition"
           >
-            <Sparkles className="w-5 h-5 text-white" />
-            <span className="text-white font-bold text-sm">Generate AI Composition</span>
+            {/* Sparkle effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <Sparkles className="w-7 h-7 text-white relative z-10 group-hover:rotate-12 transition-transform" />
           </button>
 
           {/* AI Tooltip */}
           {showAITooltip && (
-            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white rounded-lg shadow-lg px-3 py-2 z-20 text-xs whitespace-nowrap">
-              Click to generate 16 scenes automatically
+            <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-20">
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-2xl px-4 py-2.5 border-2 border-white/30">
+                <div className="font-bold text-sm">✨ AI Generate</div>
+                <div className="text-[10px] opacity-90 mt-0.5">Create 16 scenes automatically</div>
+              </div>
+              {/* Arrow */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px]">
+                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-indigo-600"></div>
+              </div>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Credits Button */}
-      <div className="mt-3 flex justify-center">
+        {/* Credits Button */}
         <button
-          className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-xl hover:shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group relative overflow-hidden"
           onMouseEnter={() => setShowCredits(true)}
           onMouseLeave={() => setShowCredits(false)}
+          title="Credits"
         >
-          <Info className="w-5 h-5 text-white" />
+          {/* Shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Info className="w-7 h-7 text-white relative z-10" />
         </button>
       </div>
     </div>
