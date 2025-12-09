@@ -3,7 +3,8 @@ import { SourceItem } from './SourceItem';
 import { PackSelector } from './PackSelector';
 import { VolumeControls } from './VolumeControls';
 import { getPackSources } from '../data/sources';
-import { Music, Wind, Info, Sparkles } from 'lucide-react';
+import { AIComposer } from '../services/aiComposer';
+import { Music, Wind, Info, Sparkles, Brain, Layers, Target } from 'lucide-react';
 import { useState } from 'react';
 
 interface SourcePanelProps {
@@ -47,6 +48,9 @@ export function SourcePanel({
 
   // 이미 배치된 소스 ID 목록
   const placedSourceIds = new Set(placedSources.map(p => p.sourceId));
+
+  // AI 감정 프로파일 가져오기
+  const emotionProfile = AIComposer.getEmotionProfile(selectedPack);
 
   return (
     <div className="w-auto bg-white/60 backdrop-blur-sm border-r-2 border-yellow-200 p-4 overflow-y-auto shadow-lg flex flex-col">
@@ -138,28 +142,80 @@ export function SourcePanel({
         )}
       </div>
 
+      {/* AI Profile Info Card */}
+      <div className="mt-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200 shadow-md">
+        <div className="flex items-center gap-2 mb-3">
+          <Brain className="w-5 h-5 text-purple-600" />
+          <h3 className="text-sm font-bold text-purple-900">{emotionProfile.name}</h3>
+        </div>
+
+        <p className="text-xs text-purple-700 mb-3">{emotionProfile.description}</p>
+
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="bg-white/60 rounded-lg p-2">
+            <div className="flex items-center gap-1 mb-1">
+              <Music className="w-3 h-3 text-amber-600" />
+              <span className="text-xs text-gray-700 font-medium">Music</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div
+                className="bg-gradient-to-r from-amber-400 to-yellow-500 h-1.5 rounded-full"
+                style={{ width: `${emotionProfile.musicDensity * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white/60 rounded-lg p-2">
+            <div className="flex items-center gap-1 mb-1">
+              <Wind className="w-3 h-3 text-orange-600" />
+              <span className="text-xs text-gray-700 font-medium">Ambience</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div
+                className="bg-gradient-to-r from-orange-400 to-amber-500 h-1.5 rounded-full"
+                style={{ width: `${emotionProfile.ambienceDensity * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="flex items-center gap-1">
+            <Target className="w-3 h-3 text-purple-500" />
+            <span className="text-gray-700">{emotionProfile.spatialPattern}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Layers className="w-3 h-3 text-purple-500" />
+            <span className="text-gray-700">{emotionProfile.layering}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Credits and AI Buttons */}
       <div className="mt-4 flex justify-center gap-3 relative">
         {/* AI Generate Button */}
         <div className="relative">
           <button
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
+            className="flex-1 px-6 py-3 rounded-2xl bg-gradient-to-br from-purple-400 to-blue-500 shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center gap-2 border-2 border-white"
             onClick={onGenerateAI}
             onMouseEnter={() => setShowAITooltip(true)}
             onMouseLeave={() => setShowAITooltip(false)}
           >
-            <Sparkles className="w-5 h-5 text-yellow-700" />
+            <Sparkles className="w-5 h-5 text-white" />
+            <span className="text-white font-bold text-sm">Generate AI Composition</span>
           </button>
 
           {/* AI Tooltip */}
           {showAITooltip && (
-            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white rounded-md shadow-lg px-2 py-1 z-20 border border-gray-200">
-              <p className="text-gray-700 text-xs whitespace-nowrap">Generate with AI?</p>
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white rounded-lg shadow-lg px-3 py-2 z-20 text-xs whitespace-nowrap">
+              Click to generate 16 scenes automatically
             </div>
           )}
         </div>
+      </div>
 
-        {/* Credits Button */}
+      {/* Credits Button */}
+      <div className="mt-3 flex justify-center">
         <button
           className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-400 shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center border-2 border-white"
           onMouseEnter={() => setShowCredits(true)}

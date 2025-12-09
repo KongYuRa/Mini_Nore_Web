@@ -5,6 +5,7 @@ import { useAudioManager, ListenerPosition } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
 import { getPackSources } from './data/sources';
 import { CompositionResponse, CompositionData, apiService } from './services/api';
+import { AIComposer } from './services/aiComposer';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
 
@@ -216,11 +217,19 @@ export default function App() {
   };
 
   const handleRemoveSource = (id: string) => {
-    // Remove only from current scene (per-scene for both music and ambience)
+    // Find the source to check its type
+    const placedSource = currentScene.placedSources.find(s => s.id === id);
+    if (!placedSource) return;
+
+    const packSources = getPackSources(selectedPack);
+    const source = packSources.find(s => s.id === placedSource.sourceId);
+    if (!source) return;
+
+    // If it's an ambience source, remove from all scenes. If music, only current scene.
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
+        source.type === 'ambience' || scene.id === currentSlot
           ? { ...scene, placedSources: scene.placedSources.filter(s => s.id !== id) }
           : scene
       )
@@ -279,16 +288,27 @@ export default function App() {
   };
 
 
-  // AI 생성 composition 로드
-  const handleGenerateAI = async () => {
+  // AI 생성 composition 로드 (로컬 AI 엔진 사용)
+  const handleGenerateAI = () => {
     try {
-      const composition = await apiService.generateComposition(selectedPack, 1.0);
+      const sources = getPackSources(selectedPack);
+      const generatedScenes = AIComposer.generateComposition(
+        selectedPack,
+        sources,
+        canvasSize.width,
+        canvasSize.height,
+        16
+      );
+
       setAllPackScenes({
         ...allPackScenes,
-        [selectedPack]: composition.scenes,
+        [selectedPack]: generatedScenes,
       });
-      toast.success('AI composition generated!', {
-        duration: 2000,
+
+      const profile = AIComposer.getEmotionProfile(selectedPack);
+      toast.success(`AI Composition: ${profile.name}`, {
+        description: profile.description,
+        duration: 3000,
       });
     } catch (error) {
       console.error('AI generation failed:', error);
