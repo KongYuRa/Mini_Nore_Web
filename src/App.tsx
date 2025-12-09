@@ -217,11 +217,19 @@ export default function App() {
   };
 
   const handleRemoveSource = (id: string) => {
-    // Remove only from current scene (per-scene for both music and ambience)
+    // Find the source to check its type
+    const placedSource = currentScene.placedSources.find(s => s.id === id);
+    if (!placedSource) return;
+
+    const packSources = getPackSources(selectedPack);
+    const source = packSources.find(s => s.id === placedSource.sourceId);
+    if (!source) return;
+
+    // If it's an ambience source, remove from all scenes. If music, only current scene.
     setAllPackScenes({
       ...allPackScenes,
       [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
+        source.type === 'ambience' || scene.id === currentSlot
           ? { ...scene, placedSources: scene.placedSources.filter(s => s.id !== id) }
           : scene
       )
