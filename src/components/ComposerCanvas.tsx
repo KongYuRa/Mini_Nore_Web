@@ -256,8 +256,40 @@ export function ComposerCanvas({
           const refDistancePixels = 50;  // 1m = 50px
           const maxDistancePixels = 200; // 20m = 200px
 
+          // 리스너와의 거리 계산
+          const dx = placed.x - listenerPos2D.x;
+          const dy = placed.y - listenerPos2D.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
           return (
             <div key={`audio-range-${placed.id}`} className="absolute pointer-events-none z-0">
+              {/* 리스너-소스 연결선 */}
+              <svg
+                className="absolute top-0 left-0 w-full h-full"
+                style={{ pointerEvents: 'none' }}
+              >
+                <line
+                  x1={listenerPos2D.x}
+                  y1={listenerPos2D.y}
+                  x2={placed.x}
+                  y2={placed.y}
+                  stroke="rgba(99, 102, 241, 0.3)"
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                />
+              </svg>
+
+              {/* 거리 텍스트 */}
+              <div
+                className="absolute bg-blue-500/90 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg"
+                style={{
+                  left: (placed.x + listenerPos2D.x) / 2 - 20,
+                  top: (placed.y + listenerPos2D.y) / 2 - 10,
+                }}
+              >
+                {Math.round(distance)}px
+              </div>
+
               {/* 최대 영향 범위 */}
               <div
                 className="absolute rounded-full border-2 border-blue-300/30 bg-blue-400/5"

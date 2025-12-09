@@ -5,6 +5,7 @@ import { useAudioManager, ListenerPosition } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
 import { getPackSources } from './data/sources';
 import { CompositionResponse, CompositionData, apiService } from './services/api';
+import { AIComposer } from './services/aiComposer';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
 
@@ -279,16 +280,27 @@ export default function App() {
   };
 
 
-  // AI 생성 composition 로드
-  const handleGenerateAI = async () => {
+  // AI 생성 composition 로드 (로컬 AI 엔진 사용)
+  const handleGenerateAI = () => {
     try {
-      const composition = await apiService.generateComposition(selectedPack, 1.0);
+      const sources = getPackSources(selectedPack);
+      const generatedScenes = AIComposer.generateComposition(
+        selectedPack,
+        sources,
+        canvasSize.width,
+        canvasSize.height,
+        16
+      );
+
       setAllPackScenes({
         ...allPackScenes,
-        [selectedPack]: composition.scenes,
+        [selectedPack]: generatedScenes,
       });
-      toast.success('AI composition generated!', {
-        duration: 2000,
+
+      const profile = AIComposer.getEmotionProfile(selectedPack);
+      toast.success(`AI Composition: ${profile.name}`, {
+        description: profile.description,
+        duration: 3000,
       });
     } catch (error) {
       console.error('AI generation failed:', error);
