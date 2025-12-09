@@ -76,7 +76,7 @@ export default function App() {
   const [listenerPosition, setListenerPosition] = useState<ListenerPosition>({
     x: 0,      // 중앙 (좌우)
     y: 1.6,    // 귀 높이
-    z: -5,     // 중앙 (앞뒤)
+    z: 5,      // 화면 밖 (화면을 바라봄)
   });
 
   // Canvas 크기 (3D 좌표 변환용)
@@ -371,8 +371,8 @@ export default function App() {
           onTogglePlayAll={handleTogglePlayAll}
           onMoveListener={(x, y) => {
             // 2D 캔버스 좌표를 3D 좌표로 변환하여 설정
-            const x3d = (x / canvasSize.width) * 10 - 5;
-            const z3d = -(y / canvasSize.height) * 10;
+            const x3d = 5 - (x / canvasSize.width) * 10;
+            const z3d = (y / canvasSize.height) * 10;
             setListenerPosition({ x: x3d, y: 1.6, z: z3d });
           }}
         />

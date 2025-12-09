@@ -50,14 +50,14 @@ export function useAudioManager({
 
   // 2D 캔버스 좌표 → 3D 오디오 공간 변환
   const canvasTo3D = (x: number, y: number): ListenerPosition => {
-    // X: -5m ~ +5m (좌우)
-    const x3d = (x / canvasWidth) * 10 - 5;
+    // X: -5m ~ +5m (좌우) - 반전하여 오른쪽이 양수
+    const x3d = 5 - (x / canvasWidth) * 10;
 
     // Y: 1.6m 고정 (귀 높이)
     const y3d = 1.6;
 
-    // Z: 0 ~ -10m (앞쪽이 음수, 멀수록 작아짐)
-    const z3d = -(y / canvasHeight) * 10;
+    // Z: 0 ~ 10m (위쪽이 가깝고 아래쪽이 멀도록)
+    const z3d = (y / canvasHeight) * 10;
 
     return { x: x3d, y: y3d, z: z3d };
   };
@@ -102,16 +102,16 @@ export function useAudioManager({
         // Modern API
         listener.positionX.value = 0;
         listener.positionY.value = 1.6; // 귀 높이
-        listener.positionZ.value = 0;
+        listener.positionZ.value = 5; // 화면 밖에서 화면을 바라봄
         listener.forwardX.value = 0;
         listener.forwardY.value = 0;
-        listener.forwardZ.value = -1; // 앞쪽 바라봄
+        listener.forwardZ.value = -1; // 앞쪽(화면 안쪽) 바라봄
         listener.upX.value = 0;
         listener.upY.value = 1;
         listener.upZ.value = 0;
       } else {
         // Legacy API (fallback)
-        listener.setPosition(0, 1.6, 0);
+        listener.setPosition(0, 1.6, 5);
         listener.setOrientation(0, 0, -1, 0, 1, 0);
       }
     }
