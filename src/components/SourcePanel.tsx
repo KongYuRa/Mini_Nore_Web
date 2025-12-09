@@ -143,15 +143,15 @@ export function SourcePanel({
         {/* AI Generate Button */}
         <div className="relative">
           <button
-            className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-400 via-violet-500 to-indigo-500 shadow-xl hover:shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group relative overflow-hidden"
+            className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 via-violet-700 to-indigo-800 shadow-xl hover:shadow-2xl transition-all hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white group relative overflow-hidden"
             onClick={onGenerateAI}
             onMouseEnter={() => setShowAITooltip(true)}
             onMouseLeave={() => setShowAITooltip(false)}
             title="Generate AI Composition"
           >
             {/* Sparkle effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <Sparkles className="w-7 h-7 text-white relative z-10 group-hover:rotate-12 transition-transform" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <Sparkles className="w-7 h-7 text-yellow-300 relative z-10 group-hover:rotate-12 transition-transform drop-shadow-lg" />
           </button>
 
           {/* AI Tooltip */}
