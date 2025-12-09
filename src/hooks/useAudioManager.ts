@@ -49,7 +49,7 @@ export function useAudioManager({
   const mainAmbienceNodeRef = useRef<AudioBufferSourceNode | null>(null);
 
   // 2D 캔버스 좌표 → 3D 오디오 공간 변환
-  const canvasTo3D = (x: number, y: number): ListenerPosition => {
+  const canvasTo3D = (x: number, y: number, depth: number = 0): ListenerPosition => {
     // X: -5m ~ +5m (좌우) - 반전하여 오른쪽이 양수
     const x3d = 5 - (x / canvasWidth) * 10;
 
@@ -57,7 +57,9 @@ export function useAudioManager({
     const y3d = 1.6;
 
     // Z: 0 ~ 10m (위쪽이 가깝고 아래쪽이 멀도록)
-    const z3d = (y / canvasHeight) * 10;
+    // depth: -1 (앞으로 5m) ~ 0 (기본) ~ 1 (뒤로 5m)
+    const baseZ = (y / canvasHeight) * 10;
+    const z3d = baseZ + (depth * 5);
 
     return { x: x3d, y: y3d, z: z3d };
   };
@@ -215,7 +217,7 @@ export function useAudioManager({
   }, [selectedPack, ambienceMuted, isPlaying]);
 
   // Create 3D panner node for ambience (앰비언스만 3D 적용)
-  const create3DPanner = (sourceId: string, x: number, y: number): PannerNode | null => {
+  const create3DPanner = (sourceId: string, x: number, y: number, depth: number = 0): PannerNode | null => {
     if (!audioContextRef.current) return null;
 
     const panner = audioContextRef.current.createPanner();
@@ -230,8 +232,8 @@ export function useAudioManager({
     panner.coneOuterAngle = 360;
     panner.coneOuterGain = 0.5;
 
-    // 2D 좌표 → 3D 위치 변환
-    const pos3d = canvasTo3D(x, y);
+    // 2D 좌표 → 3D 위치 변환 (depth 포함)
+    const pos3d = canvasTo3D(x, y, depth);
 
     // 위치 설정
     if (panner.positionX) {
@@ -247,11 +249,11 @@ export function useAudioManager({
   };
 
   // Update 3D position (앰비언스 소스 이동 시)
-  const update3DPosition = (sourceId: string, x: number, y: number) => {
+  const update3DPosition = (sourceId: string, x: number, y: number, depth: number = 0) => {
     const panner = pannerNodesRef.current.get(sourceId);
     if (!panner) return;
 
-    const pos3d = canvasTo3D(x, y);
+    const pos3d = canvasTo3D(x, y, depth);
 
     if (panner.positionX) {
       panner.positionX.value = pos3d.x;
@@ -351,8 +353,8 @@ export function useAudioManager({
             source.connect(gainNode);
             gainNode.connect(musicGainRef.current!);
           } else {
-            // Ambience: 3D spatial audio
-            const panner = create3DPanner(placed.id, placed.x, placed.y);
+            // Ambience: 3D spatial audio (with depth)
+            const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
             if (panner) {
               source.connect(gainNode);
               gainNode.connect(panner);
@@ -382,6 +384,20 @@ export function useAudioManager({
     };
 
     playAudio();
+  }, [isPlaying, currentSlot, selectedPack, scenes]);
+
+  // Update 3D positions when sources move or depth changes
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const currentPackScenes = scenes[selectedPack];
+    const currentScene = currentPackScenes[currentSlot];
+
+    currentScene.placedSources.forEach(placed => {
+      if (pannerNodesRef.current.has(placed.id)) {
+        update3DPosition(placed.id, placed.x, placed.y, placed.depth || 0);
+      }
+    });
   }, [isPlaying, currentSlot, selectedPack, scenes]);
 
   return {

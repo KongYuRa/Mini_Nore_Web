@@ -21,6 +21,7 @@ interface ComposerCanvasProps {
   onRemoveSource: (id: string) => void;
   onMoveSource: (id: string, x: number, y: number) => void;
   onToggleMute: (id: string) => void;
+  onDepthChange: (id: string, depth: number) => void;
   onTogglePlay: () => void;
   onTogglePlayAll: () => void;
   onMoveListener: (x: number, y: number) => void;
@@ -42,6 +43,7 @@ export function ComposerCanvas({
   onRemoveSource,
   onMoveSource,
   onToggleMute,
+  onDepthChange,
   onTogglePlay,
   onTogglePlayAll,
   onMoveListener,
@@ -255,6 +257,7 @@ export function ComposerCanvas({
               isDragging={draggingId === placed.id}
               onRemove={() => onRemoveSource(placed.id)}
               onToggleMute={() => onToggleMute(placed.id)}
+              onDepthChange={(depth) => onDepthChange(placed.id, depth)}
               onDragStart={() => handlePlacedDragStart(placed.id)}
               onDragEnd={(e) => handlePlacedDragEnd(e, placed.id)}
             />

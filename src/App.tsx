@@ -24,6 +24,7 @@ export interface PlacedSourceData {
   y: number;
   volume: number;
   muted?: boolean;
+  depth?: number; // -1 (앞) ~ 1 (뒤), 0은 중간
 }
 
 export interface SceneSlot {
@@ -186,6 +187,7 @@ export default function App() {
       y,
       volume: 1,
       muted: false,
+      depth: 0, // 기본값 중간
     };
 
     // If it's an ambience source, add to all scenes. If music, only current scene.
@@ -254,6 +256,31 @@ export default function App() {
               ...scene,
               placedSources: scene.placedSources.map(s =>
                 s.id === id ? { ...s, x, y } : s
+              )
+            }
+          : scene
+      )
+    });
+  };
+
+  const handleDepthChange = (id: string, depth: number) => {
+    // Find the placed source to determine its type
+    const placedSource = currentScene.placedSources.find(s => s.id === id);
+    if (!placedSource) return;
+
+    const packSources = getPackSources(selectedPack);
+    const source = packSources.find(s => s.id === placedSource.sourceId);
+    if (!source) return;
+
+    // If it's an ambience source, update depth in all scenes. If music, only current scene.
+    setAllPackScenes({
+      ...allPackScenes,
+      [selectedPack]: scenes.map(scene =>
+        source.type === 'ambience' || scene.id === currentSlot
+          ? {
+              ...scene,
+              placedSources: scene.placedSources.map(s =>
+                s.id === id ? { ...s, depth } : s
               )
             }
           : scene
@@ -367,6 +394,7 @@ export default function App() {
           onRemoveSource={handleRemoveSource}
           onMoveSource={handleMoveSource}
           onToggleMute={handleToggleMute}
+          onDepthChange={handleDepthChange}
           onTogglePlay={() => setIsPlaying(!isPlaying)}
           onTogglePlayAll={handleTogglePlayAll}
           onMoveListener={(x, y) => {
