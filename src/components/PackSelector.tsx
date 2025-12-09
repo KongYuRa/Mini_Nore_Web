@@ -81,7 +81,7 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
                 }}
               >
                 <Music className="w-4 h-4" />
-                <span>Sample Song</span>
+                <span>Music</span>
               </button>
               <button
                 className="w-full py-2 px-3 bg-gradient-to-r from-orange-300 to-amber-300 text-white rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
@@ -91,8 +91,7 @@ export function PackSelector({ selectedPack, onSelectPack }: PackSelectorProps) 
                   console.log(`Playing ambient sample for ${selectedPackData.title}`);
                 }}
               >
-                <Wind className="w-4 h-4" />
-                <span>Sample Ambient</span>
+                <span>Ambient</span>
               </button>
             </div>
           </div>

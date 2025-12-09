@@ -18,23 +18,17 @@ const adventureSources: Source[] = [
   { id: 'adv-lute', name: 'Lute', type: 'music', icon: '🪈', color: '#fef3c7' },
   { id: 'adv-melody', name: 'Melody', type: 'music', icon: '🎵', color: '#fed7aa' },
   { id: 'adv-rhythm', name: 'Rhythm', type: 'music', icon: '🥁', color: '#fdba74' },
-  // Ambience (16개)
-  { id: 'adv-bird', name: 'Birds', type: 'ambience', icon: '🐦', color: '#fde047' },
-  { id: 'adv-wind', name: 'Wind', type: 'ambience', icon: '💨', color: '#fef08a' },
-  { id: 'adv-grass', name: 'Grass', type: 'ambience', icon: '🌾', color: '#facc15' },
-  { id: 'adv-water', name: 'Water', type: 'ambience', icon: '💧', color: '#fef9c3' },
-  { id: 'adv-footsteps', name: 'Steps', type: 'ambience', icon: '👣', color: '#fbbf24' },
-  { id: 'adv-tree', name: 'Tree', type: 'ambience', icon: '🌳', color: '#eab308' },
-  { id: 'adv-sun', name: 'Sun', type: 'ambience', icon: '☀️', color: '#fde047' },
-  { id: 'adv-butterfly', name: 'Butterfly', type: 'ambience', icon: '🦋', color: '#fef3c7' },
-  { id: 'adv-flower', name: 'Flower', type: 'ambience', icon: '🌸', color: '#fde68a' },
-  { id: 'adv-leaf', name: 'Leaf', type: 'ambience', icon: '🍃', color: '#fcd34d' },
-  { id: 'adv-river', name: 'River', type: 'ambience', icon: '🌊', color: '#fef3c7' },
-  { id: 'adv-forest', name: 'Forest', type: 'ambience', icon: '🌲', color: '#fef9c3' },
+  // Ambience (10개 - AdventurePack)
+  { id: 'adv-footstep', name: 'Footstep', type: 'ambience', icon: '👣', color: '#fbbf24' },
+  { id: 'adv-birds', name: 'Birds', type: 'ambience', icon: '🐦', color: '#fde047' },
   { id: 'adv-horse', name: 'Horse', type: 'ambience', icon: '🐴', color: '#fbbf24' },
-  { id: 'adv-bee', name: 'Bee', type: 'ambience', icon: '🐝', color: '#fef3c7' },
-  { id: 'adv-cricket', name: 'Cricket', type: 'ambience', icon: '🦗', color: '#fed7aa' },
-  { id: 'adv-owl', name: 'Owl', type: 'ambience', icon: '🦉', color: '#fdba74' },
+  { id: 'adv-walla', name: 'Walla', type: 'ambience', icon: '🗣️', color: '#fef08a' },
+  { id: 'adv-river', name: 'River', type: 'ambience', icon: '🌊', color: '#fef3c7' },
+  { id: 'adv-buggy', name: 'Buggy', type: 'ambience', icon: '🛒', color: '#facc15' },
+  { id: 'adv-sheep', name: 'Sheep', type: 'ambience', icon: '🐑', color: '#fef9c3' },
+  { id: 'adv-wolf', name: 'Wolf', type: 'ambience', icon: '🐺', color: '#fb923c' },
+  { id: 'adv-night', name: 'Night', type: 'ambience', icon: '🦗', color: '#fed7aa' },
+  { id: 'adv-frog', name: 'Frog', type: 'ambience', icon: '🐸', color: '#fdba74' },
 ];
 
 const combatSources: Source[] = [

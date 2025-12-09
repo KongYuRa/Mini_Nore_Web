@@ -61,7 +61,7 @@ export function SourcePanel({
         {/* Music Section */}
         <div className="flex flex-col">
           <div className="flex items-center justify-center py-2 px-4 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-300 text-white shadow-md border-2 border-white mb-3">
-            <Music className="w-5 h-5" />
+            <span className="text-sm font-semibold">Music</span>
           </div>
           
           {/* Music Sources Grid - 2 columns x 8 rows */}
@@ -82,7 +82,7 @@ export function SourcePanel({
         {/* Ambience Section */}
         <div className="flex flex-col">
           <div className="flex items-center justify-center py-2 px-4 rounded-xl bg-gradient-to-r from-orange-300 to-amber-300 text-white shadow-md border-2 border-white mb-3">
-            <Wind className="w-5 h-5" />
+            <span className="text-sm font-semibold">Ambience</span>
           </div>
           
           {/* Ambience Sources Grid - 2 columns x 8 rows */}
