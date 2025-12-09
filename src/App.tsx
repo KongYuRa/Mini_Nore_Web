@@ -399,7 +399,7 @@ export default function App() {
           onTogglePlayAll={handleTogglePlayAll}
           onMoveListener={(x, y) => {
             // 2D 캔버스 좌표를 3D 좌표로 변환하여 설정
-            const x3d = 5 - (x / canvasSize.width) * 10;
+            const x3d = (x / canvasSize.width) * 10 - 5;
             const z3d = (y / canvasSize.height) * 10;
             setListenerPosition({ x: x3d, y: 1.6, z: z3d });
           }}

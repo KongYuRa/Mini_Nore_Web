@@ -56,7 +56,7 @@ export function ComposerCanvas({
 
   // 3D 좌표 → 2D 캔버스 좌표 변환 (리스너 표시용)
   const listener3DTo2D = () => {
-    const x = ((5 - listenerPosition.x) / 10) * canvasWidth;
+    const x = ((listenerPosition.x + 5) / 10) * canvasWidth;
     const y = (listenerPosition.z / 10) * canvasHeight;
     return { x, y };
   };

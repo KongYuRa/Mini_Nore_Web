@@ -50,8 +50,8 @@ export function useAudioManager({
 
   // 2D 캔버스 좌표 → 3D 오디오 공간 변환
   const canvasTo3D = (x: number, y: number, depth: number = 0): ListenerPosition => {
-    // X: -5m ~ +5m (좌우) - 반전하여 오른쪽이 양수
-    const x3d = 5 - (x / canvasWidth) * 10;
+    // X: -5m ~ +5m (좌우) - 왼쪽이 음수, 오른쪽이 양수
+    const x3d = (x / canvasWidth) * 10 - 5;
 
     // Y: 1.6m 고정 (귀 높이)
     const y3d = 1.6;
@@ -269,6 +269,18 @@ export function useAudioManager({
     if (!audioContextRef.current || !musicGainRef.current || !ambienceGainRef.current) return;
 
     const playAudio = async () => {
+      // Always stop all playing sources first (씬 전환 시에도 정리)
+      sourceNodesRef.current.forEach(node => {
+        try {
+          node.stop();
+        } catch (e) {
+          // Already stopped
+        }
+      });
+      sourceNodesRef.current.clear();
+      gainNodesRef.current.clear();
+      pannerNodesRef.current.clear();
+
       if (isPlaying) {
         // Resume audio context if suspended
         if (audioContextRef.current!.state === 'suspended') {
@@ -294,9 +306,6 @@ export function useAudioManager({
 
         // Load and play each source
         for (const placed of packSources) {
-          // Skip if already playing
-          if (sourceNodesRef.current.has(placed.id)) continue;
-
           // Determine source type
           const isMusic = placed.sourceId.includes('music') ||
                          placed.sourceId.includes('hero') ||
@@ -367,19 +376,6 @@ export function useAudioManager({
           sourceNodesRef.current.set(placed.id, source);
           gainNodesRef.current.set(placed.id, gainNode);
         }
-
-      } else {
-        // Stop all playing sources
-        sourceNodesRef.current.forEach(node => {
-          try {
-            node.stop();
-          } catch (e) {
-            // Already stopped
-          }
-        });
-        sourceNodesRef.current.clear();
-        gainNodesRef.current.clear();
-        pannerNodesRef.current.clear();
       }
     };
 
