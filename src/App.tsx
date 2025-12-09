@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { SourcePanel } from './components/SourcePanel';
 import { ComposerCanvas } from './components/ComposerCanvas';
-import { useAudioManager } from './hooks/useAudioManager';
+import { useAudioManager, ListenerPosition } from './hooks/useAudioManager';
 import { useHistory } from './hooks/useHistory';
 import { getPackSources } from './data/sources';
 import { CompositionResponse, CompositionData, apiService } from './services/api';
@@ -71,6 +71,34 @@ export default function App() {
   const [musicMuted, setMusicMuted] = useState(false);
   const [ambienceMuted, setAmbienceMuted] = useState(false);
 
+  // Listener position (3D audio)
+  const [listenerPosition, setListenerPosition] = useState<ListenerPosition>({
+    x: 0,      // 중앙
+    y: 1.6,    // 귀 높이
+    z: 0,      // 중앙
+  });
+
+  // Canvas 크기 (3D 좌표 변환용)
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+
+  // Canvas 크기 감지
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const updateSize = () => {
+      if (canvasRef.current) {
+        setCanvasSize({
+          width: canvasRef.current.clientWidth,
+          height: canvasRef.current.clientHeight,
+        });
+      }
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   // Audio manager
   useAudioManager({
     scenes: allPackScenes,
@@ -82,6 +110,9 @@ export default function App() {
     ambienceVolume,
     musicMuted,
     ambienceMuted,
+    listenerPosition,
+    canvasWidth: canvasSize.width,
+    canvasHeight: canvasSize.height,
   });
 
   const currentScene = scenes[currentSlot];
@@ -308,6 +339,9 @@ export default function App() {
           isPlayingAll={isPlayingAll}
           scenes={scenes}
           currentSlot={currentSlot}
+          listenerPosition={listenerPosition}
+          canvasWidth={canvasSize.width}
+          canvasHeight={canvasSize.height}
           onSelectSlot={setCurrentSlot}
           onPlaceSource={handlePlaceSource}
           onRemoveSource={handleRemoveSource}
@@ -315,6 +349,12 @@ export default function App() {
           onToggleMute={handleToggleMute}
           onTogglePlay={() => setIsPlaying(!isPlaying)}
           onTogglePlayAll={handleTogglePlayAll}
+          onMoveListener={(x, y) => {
+            // 2D 캔버스 좌표를 3D 좌표로 변환하여 설정
+            const x3d = (x / canvasSize.width) * 10 - 5;
+            const z3d = -(y / canvasSize.height) * 10;
+            setListenerPosition({ x: x3d, y: 1.6, z: z3d });
+          }}
         />
       </div>
 

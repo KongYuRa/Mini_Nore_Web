@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
-import { Play, Pause, PlayCircle, PauseCircle } from 'lucide-react';
+import { Play, Pause, PlayCircle, PauseCircle, UserCircle } from 'lucide-react';
+import { ListenerPosition } from '../hooks/useAudioManager';
 
 interface ComposerCanvasProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -12,6 +13,9 @@ interface ComposerCanvasProps {
   isPlayingAll: boolean;
   scenes: SceneSlot[];
   currentSlot: number;
+  listenerPosition: ListenerPosition;
+  canvasWidth: number;
+  canvasHeight: number;
   onSelectSlot: (slot: number) => void;
   onPlaceSource: (source: Source, x: number, y: number) => void;
   onRemoveSource: (id: string) => void;
@@ -19,6 +23,7 @@ interface ComposerCanvasProps {
   onToggleMute: (id: string) => void;
   onTogglePlay: () => void;
   onTogglePlayAll: () => void;
+  onMoveListener: (x: number, y: number) => void;
 }
 
 export function ComposerCanvas({
@@ -29,6 +34,9 @@ export function ComposerCanvas({
   isPlayingAll,
   scenes,
   currentSlot,
+  listenerPosition,
+  canvasWidth,
+  canvasHeight,
   onSelectSlot,
   onPlaceSource,
   onRemoveSource,
@@ -36,11 +44,22 @@ export function ComposerCanvas({
   onToggleMute,
   onTogglePlay,
   onTogglePlayAll,
+  onMoveListener,
 }: ComposerCanvasProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isDraggingListener, setIsDraggingListener] = useState(false);
   const sources = getPackSources(selectedPack);
   const hasPlacedSources = placedSources.length > 0;
+
+  // 3D 좌표 → 2D 캔버스 좌표 변환 (리스너 표시용)
+  const listener3DTo2D = () => {
+    const x = ((listenerPosition.x + 5) / 10) * canvasWidth;
+    const y = ((-listenerPosition.z) / 10) * canvasHeight;
+    return { x, y };
+  };
+
+  const listenerPos2D = listener3DTo2D();
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -93,6 +112,27 @@ export function ComposerCanvas({
       }
     }
     setDraggingId(null);
+  };
+
+  // 리스너 드래그 핸들러
+  const handleListenerDragStart = () => {
+    setIsDraggingListener(true);
+  };
+
+  const handleListenerDrag = (e: React.DragEvent) => {
+    if (!canvasRef.current || e.clientX === 0 || e.clientY === 0) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (x > 0 && y > 0 && x < rect.width && y < rect.height) {
+      onMoveListener(x, y);
+    }
+  };
+
+  const handleListenerDragEnd = () => {
+    setIsDraggingListener(false);
   };
 
   const getPackBackgroundImage = () => {
@@ -206,6 +246,42 @@ export function ComposerCanvas({
         {/* Overlay for better contrast */}
         <div className="absolute inset-0 bg-white/10" />
 
+        {/* 3D 오디오 영향 범위 시각화 (앰비언스만) */}
+        {placedSources.map((placed) => {
+          const source = sources.find(s => s.id === placed.sourceId);
+          if (!source || source.type !== 'ambience') return null;
+
+          // 거리 감쇠 범위 표시 (refDistance=1, maxDistance=20)
+          // 2D에서는 픽셀로 표현
+          const refDistancePixels = 50;  // 1m = 50px
+          const maxDistancePixels = 200; // 20m = 200px
+
+          return (
+            <div key={`audio-range-${placed.id}`} className="absolute pointer-events-none z-0">
+              {/* 최대 영향 범위 */}
+              <div
+                className="absolute rounded-full border-2 border-blue-300/30 bg-blue-400/5"
+                style={{
+                  left: placed.x - maxDistancePixels,
+                  top: placed.y - maxDistancePixels,
+                  width: maxDistancePixels * 2,
+                  height: maxDistancePixels * 2,
+                }}
+              />
+              {/* 최적 청취 범위 */}
+              <div
+                className="absolute rounded-full border-2 border-blue-400/50 bg-blue-500/10 animate-pulse"
+                style={{
+                  left: placed.x - refDistancePixels,
+                  top: placed.y - refDistancePixels,
+                  width: refDistancePixels * 2,
+                  height: refDistancePixels * 2,
+                }}
+              />
+            </div>
+          );
+        })}
+
         {/* Decorative corners */}
         <div className="absolute top-4 left-4 w-10 h-10 border-t-2 border-l-2 border-yellow-200 rounded-tl-2xl z-10" />
         <div className="absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 border-yellow-200 rounded-tr-2xl z-10" />
@@ -241,6 +317,43 @@ export function ComposerCanvas({
             />
           );
         })}
+
+        {/* Listener (3D Audio) */}
+        <div
+          draggable
+          onDragStart={handleListenerDragStart}
+          onDrag={handleListenerDrag}
+          onDragEnd={handleListenerDragEnd}
+          className={`
+            absolute z-30 cursor-move transition-all
+            ${isDraggingListener ? 'scale-110 opacity-50' : 'hover:scale-110'}
+          `}
+          style={{
+            left: listenerPos2D.x - 24,
+            top: listenerPos2D.y - 24,
+          }}
+          title="Listener Position (Drag to move) - 3D Audio Center"
+        >
+          <div className="relative">
+            {/* 리스너 아이콘 */}
+            <div className="bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full p-2 border-4 border-white shadow-2xl">
+              <UserCircle className="w-8 h-8 text-white" />
+            </div>
+
+            {/* 방향 표시 (앞쪽 바라보는 방향) */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full mb-1">
+              <div className="w-0.5 h-4 bg-blue-400" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2 h-2 border-t-2 border-l-2 border-blue-400 rotate-45" />
+            </div>
+
+            {/* 레이블 */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap">
+              <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-lg font-semibold">
+                🎧 Listener
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
