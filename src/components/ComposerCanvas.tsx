@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
-import { Play, Pause, PlayCircle, PauseCircle, UserCircle } from 'lucide-react';
+import { Play, Pause, UserCircle } from 'lucide-react';
 import { ListenerPosition } from '../hooks/useAudioManager';
 
 interface ComposerCanvasProps {
@@ -190,33 +190,12 @@ export function ComposerCanvas({
 
         {/* Control Buttons */}
         <div className="flex gap-3">
-          {/* Current Scene Play/Pause */}
-          <button
-            onClick={onTogglePlay}
-            disabled={!hasPlacedSources || isPlayingAll}
-            className={`
-              px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-              ${hasPlacedSources && !isPlayingAll
-                ? 'bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
-              }
-            `}
-          >
-            {isPlaying && !isPlayingAll ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </button>
-
-          {/* Full Sequence Play/Pause (All Scenes 1-16) */}
+          {/* Global Play/Pause (All Scenes) */}
           <button
             onClick={onTogglePlayAll}
-            className={`
-              px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-              ${isPlayingAll
-                ? 'bg-gradient-to-r from-orange-400 to-red-400 hover:shadow-xl hover:scale-105 border-white shadow-lg'
-                : 'bg-gradient-to-r from-purple-400 to-pink-400 hover:shadow-xl hover:scale-105 border-white shadow-lg'
-              }
-            `}
+            className="px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2 bg-gradient-to-r from-amber-300 to-yellow-300 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg"
           >
-            {isPlayingAll ? <PauseCircle className="w-6 h-6 text-yellow-700" /> : <PlayCircle className="w-6 h-6 text-yellow-700" />}
+            {isPlayingAll ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
           </button>
         </div>
       </div>
