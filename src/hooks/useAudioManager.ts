@@ -390,6 +390,11 @@ export function useAudioManager({
 
       // Load and play each source
       for (const placed of packSources) {
+        // Stop existing audio for this ID first to prevent duplicates
+        if (sourceNodesRef.current.has(placed.id)) {
+          stopAudioSource(placed.id);
+        }
+
         // Determine source type
         const isMusic = placed.sourceId.includes('music') ||
                        placed.sourceId.includes('hero') ||
@@ -472,11 +477,11 @@ export function useAudioManager({
     // Start audio for newly added sources
     const playNewSources = async () => {
       for (const placed of currentScene.placedSources) {
-        // Skip if already playing
-        if (sourceNodesRef.current.has(placed.id)) continue;
-
         // Skip if not from current pack
         if (!placed.sourceId.startsWith(packPrefix)) continue;
+
+        // Skip if already playing (no need to restart)
+        if (sourceNodesRef.current.has(placed.id)) continue;
 
         // Determine source type
         const isMusic = placed.sourceId.includes('music') ||
