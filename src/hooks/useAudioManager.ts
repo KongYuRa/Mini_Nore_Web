@@ -9,6 +9,20 @@ export interface ListenerPosition {
   z: number;
 }
 
+// Adventure Pack ambience audio file mapping
+const AMBIENCE_MAP: Record<string, string> = {
+  'adv-footstep': 'mininore_AdventurePack_02footstep.wav',
+  'adv-birds': 'mininore_AdventurePack_03Birds.wav',
+  'adv-horse': 'mininore_AdventurePack_04Horse.wav',
+  'adv-walla': 'mininore_AdventurePack_05Walla.wav',
+  'adv-river': 'mininore_AdventurePack_06River.wav',
+  'adv-buggy': 'mininore_AdventurePack_07Buggy.wav',
+  'adv-sheep': 'mininore_AdventurePack_08Sheep.wav',
+  'adv-wolf': 'mininore_AdventurePack_09Wolf.wav',
+  'adv-night': 'mininore_AdventurePack_10night.wav',
+  'adv-frog': 'mininore_AdventurePack_11frog.wav',
+};
+
 interface AudioManagerProps {
   scenes: PackScenes;
   currentSlot: number;
@@ -91,25 +105,13 @@ export function useAudioManager({
   const preloadAllAudio = async () => {
     if (!audioContextRef.current || preloadedRef.current) return;
 
-    console.log('Preloading all audio files...');
-
     const allUrls = [
       '/ambient/01AdventurePack/mininore_AdventurePack_01Mainambience.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_02footstep.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_03Birds.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_04Horse.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_05Walla.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_06River.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_07Buggy.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_08Sheep.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_09Wolf.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_10night.wav',
-      '/ambient/01AdventurePack/mininore_AdventurePack_11frog.wav',
+      ...Object.values(AMBIENCE_MAP).map(fileName => `/ambient/01AdventurePack/${fileName}`)
     ];
 
     await Promise.all(allUrls.map(url => loadAudioFile(url)));
     preloadedRef.current = true;
-    console.log('All audio files preloaded!');
   };
 
   // Initialize audio context
@@ -196,7 +198,6 @@ export function useAudioManager({
           // Already stopped
         }
         mainAmbienceNodeRef.current = null;
-        console.log('Main ambience stopped');
       }
       return;
     }
@@ -217,15 +218,14 @@ export function useAudioManager({
 
       if (!buffer || !audioContextRef.current || !ambienceGainRef.current) return;
 
-      // Create and play main ambience
+      // Create and play main ambience with explicit infinite loop
       const source = audioContextRef.current.createBufferSource();
       source.buffer = buffer;
-      source.loop = true; // Loop indefinitely
+      source.loop = true;
       source.connect(ambienceGainRef.current);
       source.start(0);
 
       mainAmbienceNodeRef.current = source;
-      console.log('Main ambience started (auto-play)');
     };
 
     playMainAmbience();
@@ -388,10 +388,6 @@ export function useAudioManager({
         s.sourceId.startsWith(packPrefix)
       );
 
-      console.log('Playing scene:', currentSlot + 1);
-      console.log('Pack:', selectedPack);
-      console.log('Pack sources:', packSources.length);
-
       // Load and play each source
       for (const placed of packSources) {
         // Determine source type
@@ -404,41 +400,23 @@ export function useAudioManager({
         // Map sourceId to file name for AdventurePack ambience
         let audioUrl = '';
         if (selectedPack === 'adventure' && !isMusic) {
-          const ambienceMap: Record<string, string> = {
-            'adv-footstep': 'mininore_AdventurePack_02footstep.wav',
-            'adv-birds': 'mininore_AdventurePack_03Birds.wav',
-            'adv-horse': 'mininore_AdventurePack_04Horse.wav',
-            'adv-walla': 'mininore_AdventurePack_05Walla.wav',
-            'adv-river': 'mininore_AdventurePack_06River.wav',
-            'adv-buggy': 'mininore_AdventurePack_07Buggy.wav',
-            'adv-sheep': 'mininore_AdventurePack_08Sheep.wav',
-            'adv-wolf': 'mininore_AdventurePack_09Wolf.wav',
-            'adv-night': 'mininore_AdventurePack_10night.wav',
-            'adv-frog': 'mininore_AdventurePack_11frog.wav',
-          };
-
-          const fileName = ambienceMap[placed.sourceId];
+          const fileName = AMBIENCE_MAP[placed.sourceId];
           if (fileName) {
             audioUrl = `/ambient/01AdventurePack/${fileName}`;
           }
         }
 
         // Skip if no audio file available (music not yet implemented)
-        if (!audioUrl) {
-          console.log(`  - ${placed.sourceId}: No audio file available yet`);
-          continue;
-        }
-
-        console.log(`  - ${placed.sourceId} at (${placed.x}, ${placed.y}) [${isMusic ? 'MUSIC' : 'AMBIENCE (3D)'}]`);
+        if (!audioUrl) continue;
 
         // Load audio buffer (should be instant from cache)
         const buffer = await loadAudioFile(audioUrl);
         if (!buffer || !audioContextRef.current) continue;
 
-        // Create source node
+        // Create source node with explicit loop
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
-        source.loop = true; // Loop all ambience sounds
+        source.loop = true;
 
         // Create gain node for individual volume control
         const gainNode = audioContextRef.current.createGain();
@@ -484,11 +462,10 @@ export function useAudioManager({
     // Get current placed source IDs
     const currentSourceIds = new Set(currentScene.placedSources.map(s => s.id));
 
-    // Stop audio for removed sources
+    // Stop audio for removed sources immediately
     sourceNodesRef.current.forEach((_, id) => {
       if (!currentSourceIds.has(id)) {
         stopAudioSource(id);
-        console.log(`Stopped removed source: ${id}`);
       }
     });
 
@@ -511,28 +488,13 @@ export function useAudioManager({
         // Map sourceId to file name
         let audioUrl = '';
         if (selectedPack === 'adventure' && !isMusic) {
-          const ambienceMap: Record<string, string> = {
-            'adv-footstep': 'mininore_AdventurePack_02footstep.wav',
-            'adv-birds': 'mininore_AdventurePack_03Birds.wav',
-            'adv-horse': 'mininore_AdventurePack_04Horse.wav',
-            'adv-walla': 'mininore_AdventurePack_05Walla.wav',
-            'adv-river': 'mininore_AdventurePack_06River.wav',
-            'adv-buggy': 'mininore_AdventurePack_07Buggy.wav',
-            'adv-sheep': 'mininore_AdventurePack_08Sheep.wav',
-            'adv-wolf': 'mininore_AdventurePack_09Wolf.wav',
-            'adv-night': 'mininore_AdventurePack_10night.wav',
-            'adv-frog': 'mininore_AdventurePack_11frog.wav',
-          };
-
-          const fileName = ambienceMap[placed.sourceId];
+          const fileName = AMBIENCE_MAP[placed.sourceId];
           if (fileName) {
             audioUrl = `/ambient/01AdventurePack/${fileName}`;
           }
         }
 
         if (!audioUrl) continue;
-
-        console.log(`Starting new source: ${placed.sourceId}`);
 
         // Load and play
         const buffer = await loadAudioFile(audioUrl);
