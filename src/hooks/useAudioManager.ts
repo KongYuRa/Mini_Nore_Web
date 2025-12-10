@@ -63,20 +63,13 @@ export function useAudioManager({
   const mainAmbienceNodeRef = useRef<AudioBufferSourceNode | null>(null);
   const preloadedRef = useRef<boolean>(false);
 
-  // 2D 캔버스 좌표 → 3D 오디오 공간 변환
+  // Convert 2D canvas coordinates to 3D audio space
   const canvasTo3D = (x: number, y: number, depth: number = 0): ListenerPosition => {
-    // X: -5m ~ +5m (좌우) - 왼쪽이 음수, 오른쪽이 양수
-    const x3d = (x / canvasWidth) * 10 - 5;
-
-    // Y: 1.6m 고정 (귀 높이)
-    const y3d = 1.6;
-
-    // Z: 0 ~ 10m (위쪽이 가깝고 아래쪽이 멀도록)
-    // depth: -1 (앞으로 5m) ~ 0 (기본) ~ 1 (뒤로 5m)
-    const baseZ = (y / canvasHeight) * 10;
-    const z3d = baseZ + (depth * 5);
-
-    return { x: x3d, y: y3d, z: z3d };
+    return {
+      x: (x / canvasWidth) * 10 - 5, // -5m to +5m (left to right)
+      y: 1.6, // Ear height
+      z: (y / canvasHeight) * 10 + (depth * 5) // 0-10m + depth offset
+    };
   };
 
   // Load audio file
@@ -115,44 +108,41 @@ export function useAudioManager({
 
   // Initialize audio context
   useEffect(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      masterGainRef.current = audioContextRef.current.createGain();
-      musicGainRef.current = audioContextRef.current.createGain();
-      ambienceGainRef.current = audioContextRef.current.createGain();
+    if (audioContextRef.current) return;
 
-      // Connect gain nodes
-      musicGainRef.current.connect(masterGainRef.current);
-      ambienceGainRef.current.connect(masterGainRef.current);
-      masterGainRef.current.connect(audioContextRef.current.destination);
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContextRef.current = ctx;
 
-      // Set listener position (default: center of canvas)
-      const listener = audioContextRef.current.listener;
-      if (listener.positionX) {
-        // Modern API
-        listener.positionX.value = 0;
-        listener.positionY.value = 1.6; // 귀 높이
-        listener.positionZ.value = 5; // 화면 밖에서 화면을 바라봄
-        listener.forwardX.value = 0;
-        listener.forwardY.value = 0;
-        listener.forwardZ.value = -1; // 앞쪽(화면 안쪽) 바라봄
-        listener.upX.value = 0;
-        listener.upY.value = 1;
-        listener.upZ.value = 0;
-      } else {
-        // Legacy API (fallback)
-        listener.setPosition(0, 1.6, 5);
-        listener.setOrientation(0, 0, -1, 0, 1, 0);
-      }
+    // Create and connect gain nodes
+    masterGainRef.current = ctx.createGain();
+    musicGainRef.current = ctx.createGain();
+    ambienceGainRef.current = ctx.createGain();
 
-      // Preload all audio files for instant playback
-      preloadAllAudio();
+    musicGainRef.current.connect(masterGainRef.current);
+    ambienceGainRef.current.connect(masterGainRef.current);
+    masterGainRef.current.connect(ctx.destination);
+
+    // Set listener position and orientation
+    const listener = ctx.listener;
+    if (listener.positionX) {
+      listener.positionX.value = 0;
+      listener.positionY.value = 1.6;
+      listener.positionZ.value = 5;
+      listener.forwardX.value = 0;
+      listener.forwardY.value = 0;
+      listener.forwardZ.value = -1;
+      listener.upX.value = 0;
+      listener.upY.value = 1;
+      listener.upZ.value = 0;
+    } else {
+      listener.setPosition(0, 1.6, 5);
+      listener.setOrientation(0, 0, -1, 0, 1, 0);
     }
 
+    preloadAllAudio();
+
     return () => {
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
+      if (ctx.state !== 'closed') ctx.close();
     };
   }, []);
 
@@ -160,13 +150,15 @@ export function useAudioManager({
   useEffect(() => {
     if (!audioContextRef.current || !listenerPosition) return;
 
-    const listener = audioContextRef.current.listener;
+    const { listener } = audioContextRef.current;
+    const { x, y, z } = listenerPosition;
+
     if (listener.positionX) {
-      listener.positionX.value = listenerPosition.x;
-      listener.positionY.value = listenerPosition.y;
-      listener.positionZ.value = listenerPosition.z;
+      listener.positionX.value = x;
+      listener.positionY.value = y;
+      listener.positionZ.value = z;
     } else {
-      listener.setPosition(listenerPosition.x, listenerPosition.y, listenerPosition.z);
+      listener.setPosition(x, y, z);
     }
   }, [listenerPosition]);
 
@@ -230,119 +222,93 @@ export function useAudioManager({
     playMainAmbience();
   }, [selectedPack, ambienceMuted, isPlaying]);
 
-  // Create 3D panner node for ambience (앰비언스만 3D 적용)
+  // Create 3D panner node for spatial audio
   const create3DPanner = (sourceId: string, x: number, y: number, depth: number = 0): PannerNode | null => {
     if (!audioContextRef.current) return null;
 
     const panner = audioContextRef.current.createPanner();
 
-    // 3D 오디오 설정
-    panner.panningModel = 'HRTF'; // 인간 청각 모델 (가장 정확한 3D 사운드)
-    panner.distanceModel = 'inverse'; // 거리 감쇠 모델
-    panner.refDistance = 3; // 거리 감쇠 시작 거리 (1 -> 3, 3배)
-    panner.maxDistance = 60; // 최대 거리 (20 -> 60, 3배)
-    panner.rolloffFactor = 0.5; // 거리 감쇠율 (1 -> 0.5, 더 천천히 감쇠)
-    panner.coneInnerAngle = 360; // 전방향 소리
-    panner.coneOuterAngle = 360;
-    panner.coneOuterGain = 0.5;
+    // Configure 3D audio with tighter spatial range
+    Object.assign(panner, {
+      panningModel: 'HRTF',
+      distanceModel: 'inverse',
+      refDistance: 1,
+      maxDistance: 20,
+      rolloffFactor: 1.5,
+      coneInnerAngle: 360,
+      coneOuterAngle: 360,
+      coneOuterGain: 0.5
+    });
 
-    // 2D 좌표 → 3D 위치 변환 (depth 포함)
-    const pos3d = canvasTo3D(x, y, depth);
-
-    // 위치 설정
+    // Set position
+    const { x: x3d, y: y3d, z: z3d } = canvasTo3D(x, y, depth);
     if (panner.positionX) {
-      panner.positionX.value = pos3d.x;
-      panner.positionY.value = pos3d.y;
-      panner.positionZ.value = pos3d.z;
+      panner.positionX.value = x3d;
+      panner.positionY.value = y3d;
+      panner.positionZ.value = z3d;
     } else {
-      panner.setPosition(pos3d.x, pos3d.y, pos3d.z);
+      panner.setPosition(x3d, y3d, z3d);
     }
 
     pannerNodesRef.current.set(sourceId, panner);
     return panner;
   };
 
-  // Update 3D position (앰비언스 소스 이동 시)
+  // Update 3D position when source is moved
   const update3DPosition = (sourceId: string, x: number, y: number, depth: number = 0) => {
     const panner = pannerNodesRef.current.get(sourceId);
     if (!panner) return;
 
-    const pos3d = canvasTo3D(x, y, depth);
-
+    const { x: x3d, y: y3d, z: z3d } = canvasTo3D(x, y, depth);
     if (panner.positionX) {
-      panner.positionX.value = pos3d.x;
-      panner.positionY.value = pos3d.y;
-      panner.positionZ.value = pos3d.z;
+      panner.positionX.value = x3d;
+      panner.positionY.value = y3d;
+      panner.positionZ.value = z3d;
     } else {
-      panner.setPosition(pos3d.x, pos3d.y, pos3d.z);
+      panner.setPosition(x3d, y3d, z3d);
     }
   };
 
-  // Stop all audio sources
+  // Stop all audio sources and disconnect nodes
   const stopAllAudio = () => {
-    sourceNodesRef.current.forEach((node, id) => {
-      try {
-        node.stop();
-        node.disconnect(); // Prevent memory leak
-      } catch (e) {
-        // Already stopped
-      }
-    });
+    const disconnect = (node: AudioNode) => {
+      try { node.disconnect(); } catch (e) { /* Already disconnected */ }
+    };
 
-    // Disconnect gain nodes
-    gainNodesRef.current.forEach(node => {
-      try {
-        node.disconnect();
-      } catch (e) {
-        // Already disconnected
-      }
+    sourceNodesRef.current.forEach(node => {
+      try { node.stop(); } catch (e) { /* Already stopped */ }
+      disconnect(node);
     });
-
-    // Disconnect panner nodes
-    pannerNodesRef.current.forEach(node => {
-      try {
-        node.disconnect();
-      } catch (e) {
-        // Already disconnected
-      }
-    });
+    gainNodesRef.current.forEach(disconnect);
+    pannerNodesRef.current.forEach(disconnect);
 
     sourceNodesRef.current.clear();
     gainNodesRef.current.clear();
     pannerNodesRef.current.clear();
   };
 
-  // Stop specific audio source
+  // Stop specific audio source and clean up
   const stopAudioSource = (sourceId: string) => {
     const sourceNode = sourceNodesRef.current.get(sourceId);
     const gainNode = gainNodesRef.current.get(sourceId);
     const pannerNode = pannerNodesRef.current.get(sourceId);
 
+    const disconnect = (node: AudioNode | undefined) => {
+      if (!node) return;
+      try { node.disconnect(); } catch (e) { /* Already disconnected */ }
+    };
+
     if (sourceNode) {
-      try {
-        sourceNode.stop();
-        sourceNode.disconnect();
-      } catch (e) {
-        // Already stopped
-      }
+      try { sourceNode.stop(); } catch (e) { /* Already stopped */ }
+      disconnect(sourceNode);
       sourceNodesRef.current.delete(sourceId);
     }
-
     if (gainNode) {
-      try {
-        gainNode.disconnect();
-      } catch (e) {
-        // Already disconnected
-      }
+      disconnect(gainNode);
       gainNodesRef.current.delete(sourceId);
     }
-
     if (pannerNode) {
-      try {
-        pannerNode.disconnect();
-      } catch (e) {
-        // Already disconnected
-      }
+      disconnect(pannerNode);
       pannerNodesRef.current.delete(sourceId);
     }
   };
@@ -396,30 +362,18 @@ export function useAudioManager({
           if (gainNode) {
             gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
           }
+          // Update 3D position if panner exists
           if (pannerNodesRef.current.has(placed.id)) {
             update3DPosition(placed.id, placed.x, placed.y, placed.depth || 0);
           }
           continue;
         }
 
-        // Determine source type
-        const isMusic = placed.sourceId.includes('music') ||
-                       placed.sourceId.includes('hero') ||
-                       placed.sourceId.includes('drums') ||
-                       placed.sourceId.includes('melody') ||
-                       placed.sourceId.includes('rhythm');
+        // Get audio URL for Adventure Pack ambience only (music not yet implemented)
+        const fileName = AMBIENCE_MAP[placed.sourceId];
+        if (!fileName) continue; // Skip if no audio file available
 
-        // Map sourceId to file name
-        let audioUrl = '';
-        if (selectedPack === 'adventure' && !isMusic) {
-          const fileName = AMBIENCE_MAP[placed.sourceId];
-          if (fileName) {
-            audioUrl = `/ambient/01AdventurePack/${fileName}`;
-          }
-        }
-
-        // Skip if no audio file available
-        if (!audioUrl) continue;
+        const audioUrl = `/ambient/01AdventurePack/${fileName}`;
 
         // Load audio buffer
         const buffer = await loadAudioFile(audioUrl);
@@ -434,23 +388,18 @@ export function useAudioManager({
         const gainNode = audioContextRef.current.createGain();
         gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
 
-        // Connect audio graph
-        if (isMusic) {
+        // Connect with 3D spatial audio
+        const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
+        if (panner) {
           source.connect(gainNode);
-          gainNode.connect(musicGainRef.current!);
-        } else {
-          const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
-          if (panner) {
-            source.connect(gainNode);
-            gainNode.connect(panner);
-            panner.connect(ambienceGainRef.current!);
-          }
-        }
+          gainNode.connect(panner);
+          panner.connect(ambienceGainRef.current!);
 
-        // Start playback
-        source.start(0);
-        sourceNodesRef.current.set(placed.id, source);
-        gainNodesRef.current.set(placed.id, gainNode);
+          // Start playback
+          source.start(0);
+          sourceNodesRef.current.set(placed.id, source);
+          gainNodesRef.current.set(placed.id, gainNode);
+        }
       }
     };
 
