@@ -121,10 +121,6 @@ export function ComposerCanvas({
 
   const handleListenerDragStart = (e: React.DragEvent) => {
     setIsDraggingListener(true);
-    // Hide drag ghost image to prevent visual artifacts
-    const img = new Image();
-    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(img, 0, 0);
   };
 
   const handleListenerDrag = (e: React.DragEvent) => {
@@ -283,7 +279,7 @@ export function ComposerCanvas({
           onDragEnd={handleListenerDragEnd}
           className={`
             absolute z-30 cursor-move transition-all
-            ${isDraggingListener ? 'scale-110 opacity-50' : 'hover:scale-110'}
+            ${isDraggingListener ? 'scale-110 opacity-0' : 'hover:scale-110'}
           `}
           style={{
             left: listenerPos2D.x - 24,
