@@ -62,7 +62,6 @@ export function useAudioManager({
   const audioBuffersRef = useRef<Map<string, AudioBuffer>>(new Map());
   const mainAmbienceNodeRef = useRef<AudioBufferSourceNode | null>(null);
   const preloadedRef = useRef<boolean>(false);
-  const currentSceneIdRef = useRef<string>('');  // Track current playing scene
 
   // 2D 캔버스 좌표 → 3D 오디오 공간 변환
   const canvasTo3D = (x: number, y: number, depth: number = 0): ListenerPosition => {
@@ -348,30 +347,19 @@ export function useAudioManager({
     }
   };
 
-  // Handle playback - Pack separation
+  // Handle playback - unified effect for all audio management
   useEffect(() => {
     if (!audioContextRef.current || !musicGainRef.current || !ambienceGainRef.current) return;
 
-    const playAudio = async () => {
+    const manageAudio = async () => {
       const currentPackScenes = scenes[selectedPack];
       const currentScene = currentPackScenes[currentSlot];
-      const sceneId = `${selectedPack}-${currentSlot}`;
 
       // If not playing, stop all audio
       if (!isPlaying) {
         stopAllAudio();
-        currentSceneIdRef.current = '';
         return;
       }
-
-      // If same scene is already playing, don't restart
-      if (sceneId === currentSceneIdRef.current && sourceNodesRef.current.size > 0) {
-        return;
-      }
-
-      // Scene changed or first play - stop and restart
-      stopAllAudio();
-      currentSceneIdRef.current = sceneId;
 
       // Resume audio context if suspended
       if (audioContextRef.current!.state === 'suspended') {
@@ -383,105 +371,36 @@ export function useAudioManager({
                        : selectedPack === 'combat' ? 'cmb-'
                        : 'shl-';
 
-      // Filter sources by current pack only
-      const packSources = currentScene.placedSources.filter(s =>
-        s.sourceId.startsWith(packPrefix)
+      // Get current scene's source IDs
+      const currentSourceIds = new Set(
+        currentScene.placedSources
+          .filter(s => s.sourceId.startsWith(packPrefix))
+          .map(s => s.id)
       );
 
-      // Load and play each source
-      for (const placed of packSources) {
-        // Stop existing audio for this ID first to prevent duplicates
-        if (sourceNodesRef.current.has(placed.id)) {
-          stopAudioSource(placed.id);
+      // Stop audio for sources that are no longer in the scene
+      sourceNodesRef.current.forEach((_, id) => {
+        if (!currentSourceIds.has(id)) {
+          stopAudioSource(id);
         }
+      });
 
-        // Determine source type
-        const isMusic = placed.sourceId.includes('music') ||
-                       placed.sourceId.includes('hero') ||
-                       placed.sourceId.includes('drums') ||
-                       placed.sourceId.includes('melody') ||
-                       placed.sourceId.includes('rhythm');
-
-        // Map sourceId to file name for AdventurePack ambience
-        let audioUrl = '';
-        if (selectedPack === 'adventure' && !isMusic) {
-          const fileName = AMBIENCE_MAP[placed.sourceId];
-          if (fileName) {
-            audioUrl = `/ambient/01AdventurePack/${fileName}`;
-          }
-        }
-
-        // Skip if no audio file available (music not yet implemented)
-        if (!audioUrl) continue;
-
-        // Load audio buffer (should be instant from cache)
-        const buffer = await loadAudioFile(audioUrl);
-        if (!buffer || !audioContextRef.current) continue;
-
-        // Create source node with explicit loop
-        const source = audioContextRef.current.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        // Create gain node for individual volume control
-        const gainNode = audioContextRef.current.createGain();
-        gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
-
-        // Connect audio graph
-        if (isMusic) {
-          // Music: Direct connection (no 3D)
-          source.connect(gainNode);
-          gainNode.connect(musicGainRef.current!);
-        } else {
-          // Ambience: 3D spatial audio (with depth)
-          const panner = create3DPanner(placed.id, placed.x, placed.y, placed.depth || 0);
-          if (panner) {
-            source.connect(gainNode);
-            gainNode.connect(panner);
-            panner.connect(ambienceGainRef.current!);
-          }
-        }
-
-        // Start playback immediately
-        source.start(0);
-        sourceNodesRef.current.set(placed.id, source);
-        gainNodesRef.current.set(placed.id, gainNode);
-      }
-    };
-
-    playAudio();
-  }, [isPlaying, currentSlot, selectedPack]);
-
-  // Update individual source volume/mute state and cleanup removed sources
-  useEffect(() => {
-    if (!isPlaying || !audioContextRef.current) return;
-
-    const currentPackScenes = scenes[selectedPack];
-    const currentScene = currentPackScenes[currentSlot];
-
-    // Get pack prefix
-    const packPrefix = selectedPack === 'adventure' ? 'adv-'
-                     : selectedPack === 'combat' ? 'cmb-'
-                     : 'shl-';
-
-    // Get current placed source IDs
-    const currentSourceIds = new Set(currentScene.placedSources.map(s => s.id));
-
-    // Stop audio for removed sources immediately
-    sourceNodesRef.current.forEach((_, id) => {
-      if (!currentSourceIds.has(id)) {
-        stopAudioSource(id);
-      }
-    });
-
-    // Start audio for newly added sources
-    const playNewSources = async () => {
+      // Process each source in current scene
       for (const placed of currentScene.placedSources) {
         // Skip if not from current pack
         if (!placed.sourceId.startsWith(packPrefix)) continue;
 
-        // Skip if already playing (no need to restart)
-        if (sourceNodesRef.current.has(placed.id)) continue;
+        // If already playing, just update properties
+        if (sourceNodesRef.current.has(placed.id)) {
+          const gainNode = gainNodesRef.current.get(placed.id);
+          if (gainNode) {
+            gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
+          }
+          if (pannerNodesRef.current.has(placed.id)) {
+            update3DPosition(placed.id, placed.x, placed.y, placed.depth || 0);
+          }
+          continue;
+        }
 
         // Determine source type
         const isMusic = placed.sourceId.includes('music') ||
@@ -499,19 +418,23 @@ export function useAudioManager({
           }
         }
 
+        // Skip if no audio file available
         if (!audioUrl) continue;
 
-        // Load and play
+        // Load audio buffer
         const buffer = await loadAudioFile(audioUrl);
         if (!buffer || !audioContextRef.current) continue;
 
+        // Create source node with explicit loop
         const source = audioContextRef.current.createBufferSource();
         source.buffer = buffer;
         source.loop = true;
 
+        // Create gain node
         const gainNode = audioContextRef.current.createGain();
         gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
 
+        // Connect audio graph
         if (isMusic) {
           source.connect(gainNode);
           gainNode.connect(musicGainRef.current!);
@@ -524,26 +447,14 @@ export function useAudioManager({
           }
         }
 
+        // Start playback
         source.start(0);
         sourceNodesRef.current.set(placed.id, source);
         gainNodesRef.current.set(placed.id, gainNode);
       }
     };
 
-    playNewSources();
-
-    // Update gain nodes for volume/mute changes
-    currentScene.placedSources.forEach(placed => {
-      const gainNode = gainNodesRef.current.get(placed.id);
-      if (gainNode) {
-        gainNode.gain.value = placed.volume * (placed.muted ? 0 : 1);
-      }
-
-      // Update 3D position if panner exists
-      if (pannerNodesRef.current.has(placed.id)) {
-        update3DPosition(placed.id, placed.x, placed.y, placed.depth || 0);
-      }
-    });
+    manageAudio();
   }, [scenes, isPlaying, currentSlot, selectedPack]);
 
   return {
