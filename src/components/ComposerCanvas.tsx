@@ -6,7 +6,6 @@ import { Play, Pause, UserCircle, Trash2 } from 'lucide-react';
 import { ListenerPosition } from '../hooks/useAudioManager';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -243,7 +242,7 @@ export function ComposerCanvas({
 
       {/* Clear Dialog */}
       <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Clear Audio Sources</AlertDialogTitle>
             <AlertDialogDescription>
@@ -251,33 +250,33 @@ export function ComposerCanvas({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex flex-col gap-3 py-4">
-            <AlertDialogAction
+            <button
               onClick={() => {
                 onClearAll();
                 setShowClearDialog(false);
               }}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="w-full px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors"
             >
               Clear All Sources
-            </AlertDialogAction>
-            <AlertDialogAction
+            </button>
+            <button
               onClick={() => {
                 onClearMusic();
                 setShowClearDialog(false);
               }}
-              className="bg-amber-500 hover:bg-amber-600 text-white"
+              className="w-full px-4 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold transition-colors"
             >
               Clear Music Only
-            </AlertDialogAction>
-            <AlertDialogAction
+            </button>
+            <button
               onClick={() => {
                 onClearAmbience();
                 setShowClearDialog(false);
               }}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="w-full px-4 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors"
             >
               Clear Ambient Only
-            </AlertDialogAction>
+            </button>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
