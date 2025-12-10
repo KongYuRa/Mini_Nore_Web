@@ -228,13 +228,13 @@ export function useAudioManager({
 
     const panner = audioContextRef.current.createPanner();
 
-    // Configure 3D audio (2/3 of original range)
+    // Configure 3D audio (reduced by 1/3 from 2/3 = 4/9 of original)
     Object.assign(panner, {
       panningModel: 'HRTF',
       distanceModel: 'inverse',
-      refDistance: 2,
-      maxDistance: 40,
-      rolloffFactor: 0.67,
+      refDistance: 1.33,
+      maxDistance: 27,
+      rolloffFactor: 1.0,
       coneInnerAngle: 360,
       coneOuterAngle: 360,
       coneOuterGain: 0.5
