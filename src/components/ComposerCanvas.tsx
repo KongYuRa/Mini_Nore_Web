@@ -119,8 +119,12 @@ export function ComposerCanvas({
   // 리스너 드래그 핸들러 (throttled for performance)
   const lastDragUpdate = useRef<number>(0);
 
-  const handleListenerDragStart = () => {
+  const handleListenerDragStart = (e: React.DragEvent) => {
     setIsDraggingListener(true);
+    // Hide drag ghost image to prevent visual artifacts
+    const img = new Image();
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    e.dataTransfer.setDragImage(img, 0, 0);
   };
 
   const handleListenerDrag = (e: React.DragEvent) => {
