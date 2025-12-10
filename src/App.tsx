@@ -77,7 +77,7 @@ export default function App() {
   const [listenerPosition, setListenerPosition] = useState<ListenerPosition>({
     x: 0,      // 중앙 (좌우)
     y: 1.6,    // 귀 높이
-    z: 5,      // 화면 밖 (화면을 바라봄)
+    z: 2,      // 화면 상단 (Empty state 텍스트와 겹치지 않도록)
   });
 
   // Canvas 크기 (3D 좌표 변환용)

@@ -243,7 +243,7 @@ export function ComposerCanvas({
         {/* Empty state */}
         {placedSources.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-20">
-            <div className="text-center text-white drop-shadow-lg">
+            <div className="text-center text-white drop-shadow-lg" style={{ marginTop: '80px' }}>
               <p className="text-xl font-bold">Drag and drop sources here!</p>
               <p className="text-sm mt-2">Create your magical soundscape</p>
             </div>
