@@ -124,19 +124,16 @@ export default function App() {
     if (isPlayingAll) {
       setIsPlaying(true);
 
-      // Auto-advance to next scene every 4 seconds
+      // Auto-advance to next scene every 4 seconds (temporary, will use music length later)
       playAllIntervalRef.current = setInterval(() => {
         setCurrentSlot((prev) => {
           const next = prev + 1;
           if (next >= 16) {
-            // Stop at the end
-            setIsPlayingAll(false);
-            setIsPlaying(false);
-            return 0; // Return to first scene
+            return 0; // Loop back to first scene and continue playing
           }
           return next;
         });
-      }, 4000); // 4 seconds per scene
+      }, 4000); // 4 seconds per scene (placeholder for music length)
 
       return () => {
         if (playAllIntervalRef.current) {
