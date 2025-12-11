@@ -285,61 +285,6 @@ export default function App() {
     });
   };
 
-  const handleClearAll = () => {
-    setAllPackScenes({
-      ...allPackScenes,
-      [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
-          ? { ...scene, placedSources: [] }
-          : scene
-      )
-    });
-  };
-
-  const handleClearMusic = () => {
-    const packSources = getPackSources(selectedPack);
-    setAllPackScenes({
-      ...allPackScenes,
-      [selectedPack]: scenes.map(scene =>
-        scene.id === currentSlot
-          ? {
-              ...scene,
-              placedSources: scene.placedSources.filter(placed => {
-                const source = packSources.find(s => s.id === placed.sourceId);
-                return source?.type !== 'music';
-              })
-            }
-          : scene
-      )
-    });
-  };
-
-  const handleClearAmbience = () => {
-    const packSources = getPackSources(selectedPack);
-    setAllPackScenes({
-      ...allPackScenes,
-      [selectedPack]: scenes.map(scene => {
-        if (scene.id === currentSlot) {
-          return {
-            ...scene,
-            placedSources: scene.placedSources.filter(placed => {
-              const source = packSources.find(s => s.id === placed.sourceId);
-              return source?.type !== 'ambience';
-            })
-          };
-        }
-        // For ambience, also remove from all scenes since they're global
-        return {
-          ...scene,
-          placedSources: scene.placedSources.filter(placed => {
-            const source = packSources.find(s => s.id === placed.sourceId);
-            return source?.type !== 'ambience';
-          })
-        };
-      })
-    });
-  };
-
   const handleTogglePlayAll = async () => {
     if (isPlayingAll) {
       // Stop full playback
@@ -449,9 +394,6 @@ export default function App() {
           onDepthChange={handleDepthChange}
           onTogglePlay={() => setIsPlaying(!isPlaying)}
           onTogglePlayAll={handleTogglePlayAll}
-          onClearAll={handleClearAll}
-          onClearMusic={handleClearMusic}
-          onClearAmbience={handleClearAmbience}
           onMoveListener={(x, y) => {
             // 2D 캔버스 좌표를 3D 좌표로 변환하여 설정
             const x3d = (x / canvasSize.width) * 10 - 5;
