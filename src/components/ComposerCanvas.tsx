@@ -2,17 +2,8 @@ import { useState, useRef } from 'react';
 import { Source, PlacedSourceData, PackType, SceneSlot } from '../App';
 import { PlacedSource } from './PlacedSource';
 import { getPackSources } from '../data/sources';
-import { Play, Pause, UserCircle, Trash2 } from 'lucide-react';
+import { Play, Pause, UserCircle } from 'lucide-react';
 import { ListenerPosition } from '../hooks/useAudioManager';
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from './ui/alert-dialog';
 
 interface ComposerCanvasProps {
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -33,9 +24,6 @@ interface ComposerCanvasProps {
   onDepthChange: (id: string, depth: number) => void;
   onTogglePlay: () => void;
   onTogglePlayAll: () => void;
-  onClearAll: () => void;
-  onClearMusic: () => void;
-  onClearAmbience: () => void;
   onMoveListener: (x: number, y: number) => void;
 }
 
@@ -58,15 +46,11 @@ export function ComposerCanvas({
   onDepthChange,
   onTogglePlay,
   onTogglePlayAll,
-  onClearAll,
-  onClearMusic,
-  onClearAmbience,
   onMoveListener,
 }: ComposerCanvasProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isDraggingListener, setIsDraggingListener] = useState(false);
-  const [showClearDialog, setShowClearDialog] = useState(false);
   const sources = getPackSources(selectedPack);
   const hasPlacedSources = placedSources.length > 0;
 
@@ -215,21 +199,6 @@ export function ComposerCanvas({
 
         {/* Control Buttons */}
         <div className="flex gap-3">
-          {/* Clear Button with Dialog */}
-          <button
-            onClick={() => setShowClearDialog(true)}
-            disabled={!hasPlacedSources}
-            className={`
-              px-6 py-3 rounded-2xl flex items-center gap-2 transition-all border-2
-              ${hasPlacedSources
-                ? 'bg-gradient-to-r from-red-400 to-red-500 text-white hover:shadow-xl hover:scale-105 border-white shadow-lg'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
-              }
-            `}
-          >
-            <Trash2 className="w-6 h-6" />
-          </button>
-
           {/* Global Play/Pause (All Scenes) */}
           <button
             onClick={onTogglePlayAll}
@@ -239,50 +208,6 @@ export function ComposerCanvas({
           </button>
         </div>
       </div>
-
-      {/* Clear Dialog */}
-      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-        <AlertDialogContent className="bg-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear Audio Sources</AlertDialogTitle>
-            <AlertDialogDescription>
-              Choose which audio sources you want to remove from the current scene.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex flex-col gap-3 py-4">
-            <button
-              onClick={() => {
-                onClearAll();
-                setShowClearDialog(false);
-              }}
-              className="w-full px-4 py-3 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors"
-            >
-              Clear All Sources
-            </button>
-            <button
-              onClick={() => {
-                onClearMusic();
-                setShowClearDialog(false);
-              }}
-              className="w-full px-4 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold transition-colors"
-            >
-              Clear Music Only
-            </button>
-            <button
-              onClick={() => {
-                onClearAmbience();
-                setShowClearDialog(false);
-              }}
-              className="w-full px-4 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors"
-            >
-              Clear Ambient Only
-            </button>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Canvas */}
       <div
